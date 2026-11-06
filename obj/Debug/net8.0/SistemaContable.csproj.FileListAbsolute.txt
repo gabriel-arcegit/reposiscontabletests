@@ -51,3 +51,5 @@ C:\ApruebaSISContable\bin\Debug\net8.0\runtimes\win-x64\native\e_sqlite3.dll
 C:\ApruebaSISContable\bin\Debug\net8.0\runtimes\win-x86\native\e_sqlite3.dll
 C:\ApruebaSISContable\obj\Debug\net8.0\SistemaC.BC380574.Up2Date
 C:\ApruebaSISContable\obj\Debug\net8.0\SistemaContable.genruntimeconfig.cache
+C:\ApruebaSISContable\obj\Debug\net8.0\SistemaContable.sourcelink.json
+C:\ApruebaSISContable\bin\Debug\net8.0\catalogo_extraido.json

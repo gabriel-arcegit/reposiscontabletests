@@ -1,15 +1,2189 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicacion Contable</title>
+    <title>Sistema Contable - Gestión Financiera Integral</title>
+
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bs-primary-rgb: 37, 99, 235;
+            --bs-body-bg: #f8fafc;
+        }
+
+        body {
+            background-color: var(--bs-body-bg);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        /* Pantalla de Login */
+        #login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            padding: 1.5rem;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: fadeIn 0.35s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* Estilo de pestañas principales */
+        .nav-tabs .nav-link {
+            font-weight: 600;
+            color: #64748b;
+            border: none;
+            padding: 0.85rem 1.15rem;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #0f172a;
+            border-color: #cbd5e1;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #2563eb;
+            background: transparent;
+            border-bottom: 3px solid #2563eb;
+        }
+
+        /* Sub-pestañas para Estados Financieros */
+        .nav-pills .nav-link {
+            font-weight: 600;
+            color: #475569;
+            border-radius: 0.5rem;
+            padding: 0.55rem 1.1rem;
+            transition: all 0.15s ease;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+        }
+
+        .card {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+        }
+
+        /* Switch interactivo */
+        .form-check-input:checked {
+            background-color: #10b981;
+            border-color: #10b981;
+        }
+
+        /* Estilos para Cuenta T */
+        .cuenta-t-card {
+            border: 1px solid #cbd5e1;
+            border-radius: 0.75rem;
+            background: #ffffff;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .cuenta-t-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .cuenta-t-header {
+            background-color: #f1f5f9;
+            border-bottom: 2px solid #334155;
+            padding: 0.65rem 0.85rem;
+            text-align: center;
+        }
+
+        .cuenta-t-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 110px;
+        }
+
+        .cuenta-t-col {
+            padding: 0.5rem 0.65rem;
+            font-size: 0.85rem;
+        }
+
+        .cuenta-t-col-debe {
+            border-right: 2px solid #334155;
+        }
+
+        .cuenta-t-col-header {
+            font-weight: 700;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.25rem;
+            margin-bottom: 0.4rem;
+            color: #475569;
+        }
+
+        .cuenta-t-movement {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.15rem 0;
+            border-bottom: 1px dashed #f1f5f9;
+        }
+
+        .cuenta-t-movement .concept {
+            color: #64748b;
+            font-size: 0.75rem;
+            max-width: 90px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cuenta-t-subtotals {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 2px solid #334155;
+            background-color: #f8fafc;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .cuenta-t-subtotal-col {
+            padding: 0.4rem 0.65rem;
+            text-align: right;
+        }
+
+        .cuenta-t-subtotal-debe {
+            border-right: 2px solid #334155;
+        }
+
+        .cuenta-t-footer {
+            border-top: 1px solid #cbd5e1;
+            padding: 0.5rem 0.85rem;
+            background-color: #f1f5f9;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom-left-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            border-radius: 0.75rem;
+            border: none;
+            color: #ffffff;
+        }
+
+        .kpi-activo { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); }
+        .kpi-pasivo { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); }
+        .kpi-capital { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+        .kpi-utilidad { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+        .kpi-utilidad-negativa { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+        .kpi-flujo-in { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .kpi-flujo-out { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .kpi-flujo-neto { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
+        .kpi-flujo-saldo { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+
+        /* Badges de clasificación contable */
+        .badge-activo { background-color: #e0f2fe; color: #0369a1; }
+        .badge-pasivo { background-color: #fef3c7; color: #b45309; }
+        .badge-capital { background-color: #ede9fe; color: #6d28d9; }
+        .badge-ingreso { background-color: #dcfce7; color: #15803d; }
+        .badge-costo { background-color: #ffedd5; color: #c2410c; }
+        .badge-gasto { background-color: #fee2e2; color: #b91c1c; }
+
+        .font-numeric {
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
 </head>
-
 <body>
-    <h1>Sistema Contable</h1>
-    <p>API Operativa lista en .NET 8</p>
-</body>
 
+    <!-- ======================================================== -->
+    <!-- 1. PANTALLA DE ACCESO / LOGIN INICIAL                     -->
+    <!-- ======================================================== -->
+    <div id="login-container">
+        <div class="login-card p-4 p-sm-5">
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 64px; height: 64px;">
+                    <i class="bi bi-shield-lock-fill fs-2"></i>
+                </div>
+                <h4 class="fw-bold mb-1 text-dark">SISContable</h4>
+                <p class="text-muted small">Sistema de Contabilidad Integral .NET 8</p>
+            </div>
+
+            <div id="login-alerta" class="alert alert-danger py-2 px-3 small d-none" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                <span id="login-alerta-texto">Credenciales incorrectas.</span>
+            </div>
+
+            <form id="form-login" novalidate>
+                <div class="mb-3">
+                    <label for="login-usuario" class="form-label fw-semibold small text-muted">Usuario</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-person-fill text-muted"></i></span>
+                        <input type="text" class="form-control" id="login-usuario" placeholder="admin" required autocomplete="username" value="admin">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="login-password" class="form-label fw-semibold small text-muted">Contraseña</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-key-fill text-muted"></i></span>
+                        <input type="password" class="form-control" id="login-password" placeholder="••••••••" required autocomplete="current-password" value="1234">
+                    </div>
+                    <div class="form-text text-muted" style="font-size: 0.75rem;">
+                        Credenciales de prueba: <strong>admin</strong> / <strong>1234</strong>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" id="btn-login">
+                    <span>Ingresar al Sistema</span>
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 2. APLICACIÓN PRINCIPAL (OCULTA HASTA LOGIN)              -->
+    <!-- ======================================================== -->
+    <div id="app-container" class="d-none">
+
+        <!-- Barra de navegación superior -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                    <i class="bi bi-journal-bookmark-fill text-primary fs-4"></i>
+                    <span>Sistema Contable Web</span>
+                </a>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-outline-light btn-sm d-flex align-items-center justify-content-center" id="btn-fullscreen" onclick="alternarPantallaCompleta()" title="Pantalla completa" style="width: 36px; height: 31px;">
+                        <i class="bi bi-fullscreen" id="icono-fullscreen"></i>
+                    </button>
+                    <div class="d-none d-md-flex align-items-center text-light small gap-2 ms-2 me-1">
+                        <span class="text-muted">Usuario:</span>
+                        <span class="badge bg-secondary"><i class="bi bi-person-circle me-1"></i>Administrador</span>
+                    </div>
+                    <button class="btn btn-outline-light btn-sm" id="btn-cerrar-sesion" title="Cerrar sesión">
+                        <i class="bi bi-box-arrow-right me-1"></i> Salir
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Datalist Global para Búsqueda Rápida de Cuentas Operativas -->
+        <datalist id="datalist-cuentas-operativas">
+            <!-- Rellenado dinámicamente con JS -->
+        </datalist>
+
+        <!-- Contenedor de Contenido Principal -->
+        <div class="container-fluid px-4 py-4">
+
+            <!-- Alerta Global de Error de Integridad -->
+            <div id="alerta-global" class="alert alert-danger alert-dismissible fade d-none shadow-sm mb-4" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-octagon-fill fs-5"></i>
+                    <strong id="alerta-global-titulo">Error Contable:</strong>
+                    <span id="alerta-global-mensaje"></span>
+                </div>
+                <button type="button" class="btn-close" aria-label="Close" onclick="ocultarAlertaGlobal()"></button>
+            </div>
+
+            <!-- Barra Superior de Navegación con Pestañas Independientes -->
+            <ul class="nav nav-tabs mb-4 flex-nowrap overflow-x-auto" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active d-flex align-items-center gap-2" id="tab-registro-btn" data-bs-toggle="tab" data-bs-target="#tab-registro" type="button" role="tab">
+                        <i class="bi bi-pencil-square"></i> Registrar Asiento
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link d-flex align-items-center gap-2" id="tab-historial-btn" data-bs-toggle="tab" data-bs-target="#tab-historial" type="button" role="tab">
+                        <i class="bi bi-clock-history"></i> Historial de Asientos
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link d-flex align-items-center gap-2" id="tab-catalogo-btn" data-bs-toggle="tab" data-bs-target="#tab-catalogo" type="button" role="tab">
+                        <i class="bi bi-folder2-open"></i> Catálogo de Cuentas
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link d-flex align-items-center gap-2" id="tab-mayor-btn" data-bs-toggle="tab" data-bs-target="#tab-mayor" type="button" role="tab">
+                        <i class="bi bi-columns-gap"></i> Libro Mayor
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link d-flex align-items-center gap-2" id="tab-balanza-btn" data-bs-toggle="tab" data-bs-target="#tab-balanza" type="button" role="tab">
+                        <i class="bi bi-table"></i> Balanza de Comprobación
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link d-flex align-items-center gap-2" id="tab-estados-btn" data-bs-toggle="tab" data-bs-target="#tab-estados" type="button" role="tab">
+                        <i class="bi bi-graph-up-arrow"></i> Estados Financieros
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Contenido de las Pestañas -->
+            <div class="tab-content" id="mainTabsContent">
+
+                <!-- ======================================================== -->
+                <!-- PESTAÑA 1: REGISTRAR ASIENTO (FORMULARIO LIMPIO)         -->
+                <!-- ======================================================== -->
+                <div class="tab-pane fade show active" id="tab-registro" role="tabpanel">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-pencil-square text-primary fs-5"></i>
+                                <h5 class="mb-0 fw-bold">Registrar Asiento Contable</h5>
+                            </div>
+                            <span class="badge bg-light text-muted border">Partida Doble Obligatoria</span>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="form-asiento" novalidate>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-3">
+                                        <label for="asiento-fecha" class="form-label fw-semibold">Fecha</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                                            <input type="date" class="form-control" id="asiento-fecha" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <label for="asiento-concepto" class="form-label fw-semibold">Concepto / Glosa</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                                            <input type="text" class="form-control" id="asiento-concepto" placeholder="Ej: Venta de mercadería al contado según factura" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tabla Dinámica de Renglones -->
+                                <div class="table-responsive mb-3">
+                                    <table class="table table-bordered table-hover align-middle mb-0" id="tabla-lineas">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 5%;" class="text-center">#</th>
+                                                <th style="width: 47%;">Cuenta Contable (Búsqueda por código o nombre)</th>
+                                                <th style="width: 21%;" class="text-end">Debe ($)</th>
+                                                <th style="width: 21%;" class="text-end">Haber ($)</th>
+                                                <th style="width: 6%;" class="text-center">Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lineas-tbody">
+                                            <!-- Renglones generados por JS -->
+                                        </tbody>
+                                        <tfoot class="table-light">
+                                            <tr>
+                                                <td colspan="2" class="text-end fw-bold">Totales en Tiempo Real:</td>
+                                                <td class="text-end fw-bold text-primary font-monospace fs-6" id="total-debe">$0.00</td>
+                                                <td class="text-end fw-bold text-primary font-monospace fs-6" id="total-haber">$0.00</td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <!-- Botón Agregar Fila -->
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                    <button type="button" class="btn btn-outline-primary btn-sm px-3" id="btn-agregar-fila">
+                                        <i class="bi bi-plus-lg me-1"></i> + Agregar Fila
+                                    </button>
+                                    <div class="small text-muted">
+                                        <i class="bi bi-info-circle me-1"></i> Escriba el código o parte del nombre en cada renglón para auto-completar.
+                                    </div>
+                                </div>
+
+                                <!-- Alerta de Validación y Cuadre en Vivo -->
+                                <div id="alerta-cuadre" class="alert alert-danger d-flex align-items-center gap-2 mb-3" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill fs-5" id="alerta-icono"></i>
+                                    <span id="alerta-mensaje">El asiento está en cero. Añada importes en las cuentas para balancear.</span>
+                                </div>
+
+                                <!-- Botones de Acción -->
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-secondary" id="btn-limpiar">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Limpiar
+                                    </button>
+                                    <button type="submit" class="btn btn-danger px-4 fw-semibold" id="btn-guardar-asiento" disabled>
+                                        <i class="bi bi-check2-circle me-1"></i> Guardar Asiento
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================================================== -->
+                <!-- PESTAÑA 2: HISTORIAL DE ASIENTOS DEDICADO                -->
+                <!-- ======================================================== -->
+                <div class="tab-pane fade" id="tab-historial" role="tabpanel">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3 gap-2">
+                            <div>
+                                <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Historial de Asientos Registrados</h5>
+                                <p class="text-muted small mb-0">Consulte los asientos contables registrados con desglose de partidas y totales cuadrados.</p>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-asientos">
+                                <i class="bi bi-arrow-repeat me-1"></i> Actualizar Historial
+                            </button>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- Buscador en tiempo real por número de asiento (#1, #2) o fecha -->
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-6 col-lg-5">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+                                        <input type="text" class="form-control" id="filtro-historial" placeholder="Buscar por número (#1, 2), fecha (YYYY-MM-DD) o concepto...">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-7 d-flex justify-content-md-end gap-2">
+                                    <span class="badge bg-light text-dark border px-3 py-2 d-flex align-items-center gap-1" id="contador-asientos">
+                                        <i class="bi bi-journal-check"></i> Asientos: <strong>0</strong>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Tabla del Historial -->
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0 align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 8%;" class="text-center">Asiento #</th>
+                                            <th style="width: 14%;">Fecha</th>
+                                            <th style="width: 28%;">Concepto / Glosa</th>
+                                            <th style="width: 35%;">Movimientos (Cuenta | Debe | Haber)</th>
+                                            <th style="width: 15%;" class="text-end">Total Cuadrado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="historial-asientos-tbody">
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-muted">
+                                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                                Cargando historial de asientos...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================================================== -->
+                <!-- PESTAÑA 3: CATÁLOGO DE CUENTAS                           -->
+                <!-- ======================================================== -->
+                <div class="tab-pane fade" id="tab-catalogo" role="tabpanel">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3 gap-2">
+                            <div>
+                                <h5 class="mb-0 fw-bold"><i class="bi bi-folder2-open text-primary me-2"></i>Catálogo General de Cuentas</h5>
+                                <p class="text-muted small mb-0">Gestione la activación y disponibilidad operativa de las cuentas del sistema.</p>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-catalogo">
+                                <i class="bi bi-arrow-repeat me-1"></i> Actualizar Catálogo
+                            </button>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- Buscador en vivo -->
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-6 col-lg-5">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+                                        <input type="text" class="form-control" id="filtro-catalogo" placeholder="Buscar por código o nombre de cuenta en vivo...">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-7 d-flex justify-content-md-end gap-2 flex-wrap">
+                                    <span class="badge bg-light text-dark border px-3 py-2 d-flex align-items-center gap-1" id="contador-cuentas-total">
+                                        <i class="bi bi-list-ul"></i> Total: <strong>0</strong>
+                                    </span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 d-flex align-items-center gap-1" id="contador-cuentas-activas">
+                                        <i class="bi bi-check-circle"></i> Activas: <strong>0</strong>
+                                    </span>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 d-flex align-items-center gap-1" id="contador-cuentas-inactivas">
+                                        <i class="bi bi-x-circle"></i> Inactivas: <strong>0</strong>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Tabla del Catálogo -->
+                            <div class="table-responsive">
+                                <table class="table table-hover table-bordered align-middle mb-0" id="tabla-catalogo">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 12%;" class="text-center">Código</th>
+                                            <th style="width: 38%;">Nombre de la Cuenta</th>
+                                            <th style="width: 15%;" class="text-center">Clasificación / Tipo</th>
+                                            <th style="width: 15%;" class="text-center">Naturaleza</th>
+                                            <th style="width: 20%;" class="text-center">Estado (Activa / Inactiva)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="catalogo-tbody">
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-muted">
+                                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                                Cargando catálogo...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================================================== -->
+                <!-- PESTAÑA 4: LIBRO MAYOR (CUENTAS T)                       -->
+                <!-- ======================================================== -->
+                <div class="tab-pane fade" id="tab-mayor" role="tabpanel">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+                        <div>
+                            <h4 class="fw-bold mb-1"><i class="bi bi-columns-gap text-primary me-2"></i>Libro Mayor</h4>
+                            <p class="text-muted small mb-0">Esquemas de Mayor responsivos con la estructura clásica de 'Cuentas T'.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control form-control-sm" id="filtro-mayor" placeholder="Filtrar por código o nombre..." style="max-width: 250px;">
+                            <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-mayor">
+                                <i class="bi bi-arrow-repeat me-1"></i> Actualizar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor de Cuentas T -->
+                    <div class="row g-4" id="contenedor-cuentas-t">
+                        <div class="col-12 text-center py-5 text-muted">
+                            <div class="spinner-border text-primary mb-2" role="status"></div>
+                            <p>Cargando esquemas de Cuentas T...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================================================== -->
+                <!-- PESTAÑA 5: BALANZA DE COMPROBACIÓN                       -->
+                <!-- ======================================================== -->
+                <div class="tab-pane fade" id="tab-balanza" role="tabpanel">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3 gap-2">
+                            <div>
+                                <h5 class="mb-0 fw-bold"><i class="bi bi-table text-primary me-2"></i>Balanza de Comprobación</h5>
+                                <p class="text-muted small mb-0">Resumen integral de movimientos (Debe/Haber) y saldos finales (Deudor/Acreedor).</p>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-balanza">
+                                <i class="bi bi-arrow-repeat me-1"></i> Actualizar Balanza
+                            </button>
+                        </div>
+                        <div class="card-body p-4">
+
+                            <!-- Banner de Cuadre de Balanza -->
+                            <div id="banner-balanza" class="alert alert-secondary d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm" role="alert">
+                                <div class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-hourglass-split fs-3" id="banner-balanza-icono"></i>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold" id="banner-balanza-titulo">Comprobando Balanza...</h6>
+                                        <small id="banner-balanza-descripcion" class="text-muted">Verificando sumas de saldos deudores y acreedores</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-secondary fs-6 px-3 py-2" id="banner-balanza-badge">Verificando...</span>
+                            </div>
+
+                            <!-- Tabla de 4 columnas de la Balanza de Comprobación -->
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover align-middle mb-0" id="tabla-balanza">
+                                    <thead class="table-light text-center">
+                                        <tr>
+                                            <th rowspan="2" style="width: 10%;">Código</th>
+                                            <th rowspan="2" style="width: 34%;" class="text-start">Nombre de la Cuenta</th>
+                                            <th colspan="2" style="width: 28%;" class="border-bottom">Movimientos (Sumas)</th>
+                                            <th colspan="2" style="width: 28%;" class="border-bottom">Saldos Finales</th>
+                                        </tr>
+                                        <tr>
+                                            <th style="width: 14%;" class="text-end">Debe ($)</th>
+                                            <th style="width: 14%;" class="text-end">Haber ($)</th>
+                                            <th style="width: 14%;" class="text-end">Deudor ($)</th>
+                                            <th style="width: 14%;" class="text-end">Acreedor ($)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="balanza-tbody">
+                                        <tr>
+                                            <td colspan="6" class="text-center py-4 text-muted">
+                                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                                Cargando Balanza de Comprobación...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot class="table-dark font-numeric fw-bold">
+                                        <tr>
+                                            <td colspan="2" class="text-end">TOTALES:</td>
+                                            <td class="text-end text-info" id="balanza-total-debe">$0.00</td>
+                                            <td class="text-end text-info" id="balanza-total-haber">$0.00</td>
+                                            <td class="text-end text-success" id="balanza-total-deudor">$0.00</td>
+                                            <td class="text-end text-success" id="balanza-total-acreedor">$0.00</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================================================== -->
+                <!-- PESTAÑA 6: ESTADOS FINANCIEROS (CON SUB-PESTAÑAS)        -->
+                <!-- ======================================================== -->
+                <div class="tab-pane fade" id="tab-estados" role="tabpanel">
+
+                    <!-- Sub-pestañas de Estados Financieros -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <ul class="nav nav-pills gap-2" id="estadosFinancierosPills" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active d-flex align-items-center gap-2" id="pill-balance-btn" data-bs-toggle="pill" data-bs-target="#pill-balance" type="button" role="tab">
+                                    <i class="bi bi-pie-chart-fill"></i> Balance General
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link d-flex align-items-center gap-2" id="pill-flujo-btn" data-bs-toggle="pill" data-bs-target="#pill-flujo" type="button" role="tab">
+                                    <i class="bi bi-cash-stack"></i> Flujo de Efectivo
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link d-flex align-items-center gap-2" id="pill-capital-btn" data-bs-toggle="pill" data-bs-target="#pill-capital" type="button" role="tab">
+                                    <i class="bi bi-bank"></i> Variación en el Capital
+                                </button>
+                            </li>
+                        </ul>
+                        <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-estados">
+                            <i class="bi bi-arrow-repeat me-1"></i> Actualizar Reportes
+                        </button>
+                    </div>
+
+                    <div class="tab-content" id="estadosFinancierosContent">
+
+                        <!-- ---------------------------------------------------- -->
+                        <!-- SUB-PESTAÑA 6.1: BALANCE GENERAL                     -->
+                        <!-- ---------------------------------------------------- -->
+                        <div class="tab-pane fade show active" id="pill-balance" role="tabpanel">
+                            <!-- Banner de Ecuación Contable -->
+                            <div id="banner-equilibrio" class="alert alert-secondary d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm" role="alert">
+                                <div class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-hourglass-split fs-3" id="banner-icono"></i>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold" id="banner-titulo">Calculando Ecuación Contable...</h6>
+                                        <small id="banner-descripcion" class="text-muted">Verificando Activo = Pasivo + Capital</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-secondary fs-6 px-3 py-2" id="banner-badge">Verificando...</span>
+                            </div>
+
+                            <!-- KPI Cards Balance -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3">
+                                    <div class="card kpi-card kpi-activo p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Total Activo</span>
+                                            <i class="bi bi-cash-coin fs-4"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-activo">$0.00</h3>
+                                        <small class="opacity-75 mt-1">Bienes y Derechos</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="card kpi-card kpi-pasivo p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Total Pasivo</span>
+                                            <i class="bi bi-credit-card-2-front fs-4"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-pasivo">$0.00</h3>
+                                        <small class="opacity-75 mt-1">Obligaciones y Deudas</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="card kpi-card kpi-capital p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Total Capital</span>
+                                            <i class="bi bi-bank fs-4"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-capital">$0.00</h3>
+                                        <small class="opacity-75 mt-1">Patrimonio Neto Total</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="card kpi-card kpi-utilidad p-3 shadow-sm" id="card-utilidad">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Utilidad Neta</span>
+                                            <i class="bi bi-graph-up-arrow fs-4" id="icono-utilidad"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-utilidad">$0.00</h3>
+                                        <small class="opacity-75 mt-1" id="kpi-utilidad-desc">Ingresos - Costos - Gastos</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Comprobación Matemática -->
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <div class="card shadow-sm h-100">
+                                        <div class="card-header">
+                                            <i class="bi bi-calculator me-1 text-primary"></i> Comprobación de la Ecuación Contable
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="bg-light p-3 rounded-3 text-center mb-4">
+                                                <div class="fs-5 fw-bold text-dark font-monospace">
+                                                    <span class="text-primary">ACTIVO</span> = <span class="text-warning">PASIVO</span> + <span style="color: #6d28d9;">CAPITAL</span>
+                                                </div>
+                                                <div class="fs-6 text-muted mt-2 font-monospace" id="ecuacion-valores">
+                                                    $0.00 = $0.00 + $0.00
+                                                </div>
+                                            </div>
+                                            <table class="table table-bordered mb-0">
+                                                <tbody>
+                                                    <tr>
+                                                        <th class="w-50">Lado Izquierdo (Activo)</th>
+                                                        <td class="text-end fw-bold text-primary font-monospace font-numeric" id="lado-izq">$0.00</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Lado Derecho (Pasivo + Capital)</th>
+                                                        <td class="text-end fw-bold text-success font-monospace font-numeric" id="lado-der">$0.00</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Diferencia Contable</th>
+                                                        <td class="text-end fw-bold font-monospace font-numeric" id="diferencia-balance">$0.00</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="card shadow-sm h-100">
+                                        <div class="card-header">
+                                            <i class="bi bi-info-circle me-1 text-info"></i> Integridad Financiera
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-group list-group-flush small">
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span><i class="bi bi-check2 text-success me-2"></i>Utilidad Neta integrada al Capital:</span>
+                                                    <span class="fw-bold font-numeric" id="resumen-utilidad-capital">$0.00</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span><i class="bi bi-shield-check text-success me-2"></i>Integridad de Partida Doble:</span>
+                                                    <span class="badge bg-success-subtle text-success">Verificada</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span><i class="bi bi-database text-primary me-2"></i>Motor de Base de Datos:</span>
+                                                    <span class="text-muted">SQLite / .NET 8 Web API</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ---------------------------------------------------- -->
+                        <!-- SUB-PESTAÑA 6.2: ESTADO DE FLUJO DE EFECTIVO         -->
+                        <!-- ---------------------------------------------------- -->
+                        <div class="tab-pane fade" id="pill-flujo" role="tabpanel">
+                            <!-- Tarjetas KPI de Flujo de Efectivo -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3">
+                                    <div class="card kpi-card kpi-flujo-in p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Total Entradas</span>
+                                            <i class="bi bi-arrow-down-left-circle fs-4"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-flujo-entradas">$0.00</h3>
+                                        <small class="opacity-75 mt-1">Cobros, Ventas y Aportes</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="card kpi-card kpi-flujo-out p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Total Salidas</span>
+                                            <i class="bi bi-arrow-up-right-circle fs-4"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-flujo-salidas">$0.00</h3>
+                                        <small class="opacity-75 mt-1">Compras, Costos y Gastos</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="card kpi-card kpi-flujo-neto p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Variación Neta</span>
+                                            <i class="bi bi-arrow-left-right fs-4"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-flujo-variacion">$0.00</h3>
+                                        <small class="opacity-75 mt-1">Flujo Neto del Período</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="card kpi-card kpi-flujo-saldo p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Saldo Disponible</span>
+                                            <i class="bi bi-wallet2 fs-4 text-warning"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric text-warning" id="kpi-flujo-saldo">$0.00</h3>
+                                        <small class="opacity-75 mt-1">Efectivo y Bancos (1101/1102)</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tablas de Entradas y Salidas Operativas -->
+                            <div class="row g-4">
+                                <!-- Columna Entradas -->
+                                <div class="col-lg-6">
+                                    <div class="card shadow-sm h-100">
+                                        <div class="card-header bg-success-subtle text-success py-3 d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold"><i class="bi bi-plus-circle me-1"></i> Entradas de Efectivo (Ingresos / Cobros)</span>
+                                            <span class="badge bg-success" id="badge-total-entradas">$0.00</span>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-sm mb-0 align-middle">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Fecha</th>
+                                                            <th>Concepto</th>
+                                                            <th>Categoría</th>
+                                                            <th class="text-end">Monto ($)</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="flujo-entradas-tbody">
+                                                        <tr><td colspan="5" class="text-center py-3 text-muted">No hay entradas registradas.</td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Columna Salidas -->
+                                <div class="col-lg-6">
+                                    <div class="card shadow-sm h-100">
+                                        <div class="card-header bg-warning-subtle text-dark py-3 d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold"><i class="bi bi-dash-circle me-1"></i> Salidas de Efectivo (Compras / Pagos)</span>
+                                            <span class="badge bg-warning text-dark" id="badge-total-salidas">$0.00</span>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-sm mb-0 align-middle">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Fecha</th>
+                                                            <th>Concepto</th>
+                                                            <th>Categoría</th>
+                                                            <th class="text-end">Monto ($)</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="flujo-salidas-tbody">
+                                                        <tr><td colspan="5" class="text-center py-3 text-muted">No hay salidas registradas.</td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ---------------------------------------------------- -->
+                        <!-- SUB-PESTAÑA 6.3: ESTADO DE VARIACIÓN EN EL CAPITAL   -->
+                        <!-- ---------------------------------------------------- -->
+                        <div class="tab-pane fade" id="pill-capital" role="tabpanel">
+                            <!-- KPI Cards Capital -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3">
+                                    <div class="card kpi-card bg-secondary p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Capital Inicial</span>
+                                            <i class="bi bi-hourglass-top fs-4"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-cap-inicial">$0.00</h3>
+                                        <small class="opacity-75 mt-1">Saldo de apertura</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="card kpi-card bg-primary p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Aportes del Período</span>
+                                            <i class="bi bi-plus-square fs-4"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-cap-aportes">$0.00</h3>
+                                        <small class="opacity-75 mt-1">Nuevas aportaciones de socios</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="card kpi-card bg-success p-3 shadow-sm" id="card-cap-utilidad">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Utilidad del Ejercicio</span>
+                                            <i class="bi bi-graph-up-arrow fs-4"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-cap-utilidad">$0.00</h3>
+                                        <small class="opacity-75 mt-1">Resultado neto de operaciones</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="card kpi-card kpi-capital p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-uppercase fw-semibold small opacity-75">Capital Final</span>
+                                            <i class="bi bi-bank fs-4"></i>
+                                        </div>
+                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-cap-final">$0.00</h3>
+                                        <small class="opacity-75 mt-1">Patrimonio Neto Total</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabla de Evolución Patrimonial -->
+                            <div class="card shadow-sm">
+                                <div class="card-header py-3">
+                                    <h6 class="mb-0 fw-bold"><i class="bi bi-table text-primary me-2"></i>Estado de Cambios en el Capital Contable</h6>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered mb-0 align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width: 70%;">Concepto Patrimonial</th>
+                                                    <th style="width: 30%;" class="text-end">Importe ($)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="font-numeric">
+                                                <tr>
+                                                    <td><strong>Capital Contable Inicial</strong> (al inicio del ejercicio)</td>
+                                                    <td class="text-end" id="tabla-cap-inicial">$0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="bi bi-plus-lg text-primary me-2"></i><strong>(+) Aportes de Capital</strong> (inversiones patrimoniales registradas)</td>
+                                                    <td class="text-end text-primary" id="tabla-cap-aportes">$0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="bi bi-plus-lg text-success me-2"></i><strong>(+) Utilidad Neta del Ejercicio</strong> (Ingresos - Costos - Gastos)</td>
+                                                    <td class="text-end text-success" id="tabla-cap-utilidad">$0.00</td>
+                                                </tr>
+                                                <tr class="table-primary fw-bold fs-6">
+                                                    <td><i class="bi bi-check2-circle text-primary me-2"></i>(=) CAPITAL CONTABLE FINAL AL CIERRE</td>
+                                                    <td class="text-end" id="tabla-cap-final">$0.00</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light text-muted small py-2">
+                                    <i class="bi bi-shield-check text-success me-1"></i> El Capital Contable Final coincide exactamente con la sección de Capital del Balance General.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de Notificaciones -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1200;">
+        <div id="app-toast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2" id="toast-message">
+                    Notificación
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Lógica de la Aplicación en Vanilla JavaScript -->
+    <script>
+        // Estado Global
+        const state = {
+            todasLasCuentas: [],
+            cuentasOperativas: [],
+            asientos: [],
+            mayor: [],
+            balanza: null,
+            balance: null,
+            flujo: null,
+            variacionCapital: null
+        };
+
+        // Formateador de moneda
+        const formatoMoneda = new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: 'MXN',
+            minimumFractionDigits: 2
+        });
+
+        const formatoNumero = (val) => {
+            const num = parseFloat(val) || 0;
+            return formatoMoneda.format(num);
+        };
+
+        // Mostrar Notificación Toast
+        function mostrarToast(mensaje, tipo = 'success') {
+            const toastEl = document.getElementById('app-toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastEl.className = `toast align-items-center text-white border-0 bg-${tipo}`;
+            toastMsg.innerHTML = `<i class="bi bi-${tipo === 'success' ? 'check-circle' : 'exclamation-circle'}-fill"></i> <span>${mensaje}</span>`;
+            const toast = new bootstrap.Toast(toastEl, { delay: 4500 });
+            toast.show();
+        }
+
+        // Mostrar Alerta Global de Error de Dominio
+        function mostrarAlertaGlobal(titulo, mensaje) {
+            const alerta = document.getElementById('alerta-global');
+            document.getElementById('alerta-global-titulo').textContent = titulo;
+            document.getElementById('alerta-global-mensaje').textContent = mensaje;
+            alerta.classList.remove('d-none');
+            alerta.classList.add('show');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function ocultarAlertaGlobal() {
+            const alerta = document.getElementById('alerta-global');
+            alerta.classList.remove('show');
+            alerta.classList.add('d-none');
+        }
+
+        // ========================================================
+        // CONTROL DE PANTALLA COMPLETA (FULLSCREEN API)
+        // ========================================================
+        function alternarPantallaCompleta() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.warn(`Error al intentar activar pantalla completa: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(err => {
+                        console.warn(`Error al salir de pantalla completa: ${err.message}`);
+                    });
+                }
+            }
+        }
+
+        function actualizarIconoPantallaCompleta() {
+            const icono = document.getElementById('icono-fullscreen');
+            const btn = document.getElementById('btn-fullscreen');
+            if (!icono || !btn) return;
+
+            if (document.fullscreenElement) {
+                icono.className = 'bi bi-fullscreen-exit';
+                btn.title = 'Salir de pantalla completa';
+            } else {
+                icono.className = 'bi bi-fullscreen';
+                btn.title = 'Pantalla completa';
+            }
+        }
+
+        // Eventos estándar de cambio de fullscreen (click y tecla Esc)
+        document.addEventListener('fullscreenchange', actualizarIconoPantallaCompleta);
+        document.addEventListener('webkitfullscreenchange', actualizarIconoPantallaCompleta);
+        document.addEventListener('mozfullscreenchange', actualizarIconoPantallaCompleta);
+        document.addEventListener('MSFullscreenChange', actualizarIconoPantallaCompleta);
+
+        // ========================================================
+        // 1. CONTROL DE ACCESO / LOGIN
+        // ========================================================
+        document.getElementById('form-login').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const usuario = document.getElementById('login-usuario').value.trim();
+            const pass = document.getElementById('login-password').value.trim();
+            const alerta = document.getElementById('login-alerta');
+            const alertaTexto = document.getElementById('login-alerta-texto');
+
+            if (usuario === 'admin' && pass === '1234') {
+                alerta.classList.add('d-none');
+                document.getElementById('login-container').classList.add('d-none');
+                document.getElementById('app-container').classList.remove('d-none');
+                inicializarSistema();
+            } else {
+                alertaTexto.textContent = 'Credenciales inválidas. Ingrese usuario: admin y contraseña: 1234';
+                alerta.classList.remove('d-none');
+            }
+        });
+
+        document.getElementById('btn-cerrar-sesion').addEventListener('click', () => {
+            document.getElementById('app-container').classList.add('d-none');
+            document.getElementById('login-container').classList.remove('d-none');
+            document.getElementById('login-password').value = '';
+        });
+
+        // ========================================================
+        // 2. INICIALIZACIÓN DEL SISTEMA
+        // ========================================================
+        let sistemaInicializado = false;
+
+        async function inicializarSistema() {
+            if (sistemaInicializado) return;
+            sistemaInicializado = true;
+
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('asiento-fecha').value = hoy;
+
+            // Carga de cuentas iniciales y armado de líneas base
+            await cargarCuentas();
+            crearFilaDiario();
+            crearFilaDiario();
+            recalcularTotalesDiario();
+
+            // Cargar historial en background
+            cargarHistorialAsientos();
+
+            // Event Listeners para Pestañas Principales
+            document.getElementById('tab-historial-btn').addEventListener('shown.bs.tab', cargarHistorialAsientos);
+            document.getElementById('tab-catalogo-btn').addEventListener('shown.bs.tab', cargarCuentas);
+            document.getElementById('tab-mayor-btn').addEventListener('shown.bs.tab', cargarLibroMayor);
+            document.getElementById('tab-balanza-btn').addEventListener('shown.bs.tab', cargarBalanzaComprobacion);
+            document.getElementById('tab-estados-btn').addEventListener('shown.bs.tab', () => {
+                cargarTodosLosEstadosFinancieros();
+            });
+
+            // Sub-pestañas de Estados Financieros
+            document.getElementById('pill-balance-btn').addEventListener('shown.bs.tab', cargarBalanceGeneral);
+            document.getElementById('pill-flujo-btn').addEventListener('shown.bs.tab', cargarFlujoEfectivo);
+            document.getElementById('pill-capital-btn').addEventListener('shown.bs.tab', cargarVariacionCapital);
+
+            // Botones de Refrescar
+            document.getElementById('btn-refrescar-asientos').addEventListener('click', cargarHistorialAsientos);
+            document.getElementById('btn-refrescar-catalogo').addEventListener('click', cargarCuentas);
+            document.getElementById('btn-refrescar-mayor').addEventListener('click', cargarLibroMayor);
+            document.getElementById('btn-refrescar-balanza').addEventListener('click', cargarBalanzaComprobacion);
+            document.getElementById('btn-refrescar-estados').addEventListener('click', cargarTodosLosEstadosFinancieros);
+
+            // Filtros en vivo
+            document.getElementById('filtro-historial').addEventListener('input', (e) => {
+                renderizarHistorialAsientos(e.target.value.trim().toLowerCase());
+            });
+
+            document.getElementById('filtro-catalogo').addEventListener('input', (e) => {
+                renderizarTablaCatalogo(e.target.value.trim().toLowerCase());
+            });
+
+            document.getElementById('filtro-mayor').addEventListener('input', (e) => {
+                renderizarLibroMayor(e.target.value.trim().toLowerCase());
+            });
+
+            // Botones del Formulario de Registro
+            document.getElementById('btn-agregar-fila').addEventListener('click', () => {
+                crearFilaDiario();
+                recalcularTotalesDiario();
+            });
+
+            document.getElementById('btn-limpiar').addEventListener('click', resetearFormularioDiario);
+            document.getElementById('form-asiento').addEventListener('submit', guardarAsiento);
+        }
+
+        // Carga de Cuentas (Catálogo y Operativas)
+        async function cargarCuentas() {
+            try {
+                const [resTodas, resOperativas] = await Promise.all([
+                    fetch('/api/cuentas'),
+                    fetch('/api/cuentas/operativas')
+                ]);
+
+                if (resTodas.ok) {
+                    state.todasLasCuentas = await resTodas.json();
+                    renderizarTablaCatalogo(document.getElementById('filtro-catalogo').value.trim().toLowerCase());
+                }
+
+                if (resOperativas.ok) {
+                    state.cuentasOperativas = await resOperativas.json();
+                    actualizarDatalistOperativas();
+                }
+            } catch (err) {
+                console.error('Error al cargar cuentas:', err);
+                mostrarToast('Error al conectar con la API de cuentas: ' + err.message, 'danger');
+            }
+        }
+
+        function actualizarDatalistOperativas() {
+            const datalist = document.getElementById('datalist-cuentas-operativas');
+            datalist.innerHTML = state.cuentasOperativas.map(c => {
+                const codigo = c.codigo || c.Codigo;
+                const nombre = c.nombre || c.Nombre;
+                const tipo = c.tipo || c.Tipo;
+                return `<option value="${codigo} - ${nombre}" data-codigo="${codigo}" data-nombre="${nombre}">[${tipo}]</option>`;
+            }).join('');
+        }
+
+        // ========================================================
+        // 3. PESTAÑA: REGISTRAR ASIENTO (LÓGICA Y CORRECCIÓN DE BUG)
+        // ========================================================
+        let contadorFilasDiario = 0;
+
+        function crearFilaDiario() {
+            contadorFilasDiario++;
+            const tbody = document.getElementById('lineas-tbody');
+            const tr = document.createElement('tr');
+            tr.id = `fila-diario-${contadorFilasDiario}`;
+
+            tr.innerHTML = `
+                <td class="text-center fw-bold text-muted index-cell"></td>
+                <td>
+                    <div class="position-relative">
+                        <input type="text" class="form-control input-cuenta-rapida"
+                            list="datalist-cuentas-operativas"
+                            placeholder="Escriba código o nombre de cuenta..."
+                            autocomplete="off" required>
+                        <input type="hidden" class="hidden-codigo-cuenta">
+                        <input type="hidden" class="hidden-nombre-cuenta">
+                        <div class="cuenta-feedback small mt-1 text-muted fst-italic">Seleccione una cuenta del listado</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">$</span>
+                        <input type="number" step="0.01" min="0" class="form-control text-end input-debe font-monospace" placeholder="0.00" value="0.00">
+                    </div>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">$</span>
+                        <input type="number" step="0.01" min="0" class="form-control text-end input-haber font-monospace" placeholder="0.00" value="0.00">
+                    </div>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-eliminar-fila" title="Eliminar renglón">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+
+            const inputBusqueda = tr.querySelector('.input-cuenta-rapida');
+            const hiddenCodigo = tr.querySelector('.hidden-codigo-cuenta');
+            const hiddenNombre = tr.querySelector('.hidden-nombre-cuenta');
+            const feedback = tr.querySelector('.cuenta-feedback');
+            const inputDebe = tr.querySelector('.input-debe');
+            const inputHaber = tr.querySelector('.input-haber');
+            const btnEliminar = tr.querySelector('.btn-eliminar-fila');
+
+            const validarSeleccionCuenta = () => {
+                const valor = inputBusqueda.value.trim();
+                if (!valor) {
+                    hiddenCodigo.value = '';
+                    hiddenNombre.value = '';
+                    feedback.className = 'cuenta-feedback small mt-1 text-muted fst-italic';
+                    feedback.textContent = 'Seleccione una cuenta del listado';
+                    return;
+                }
+
+                let encontrada = state.cuentasOperativas.find(c => {
+                    const cod = c.codigo || c.Codigo;
+                    const nom = c.nombre || c.Nombre;
+                    return valor === `${cod} - ${nom}` || valor === cod || valor.startsWith(`${cod} -`);
+                });
+
+                if (!encontrada) {
+                    encontrada = state.cuentasOperativas.find(c => (c.codigo || c.Codigo) === valor);
+                }
+
+                if (!encontrada) {
+                    encontrada = state.cuentasOperativas.find(c => (c.nombre || c.Nombre).toLowerCase() === valor.toLowerCase());
+                }
+
+                if (encontrada) {
+                    const cod = encontrada.codigo || encontrada.Codigo;
+                    const nom = encontrada.nombre || encontrada.Nombre;
+                    const tipo = encontrada.tipo || encontrada.Tipo;
+                    hiddenCodigo.value = cod;
+                    hiddenNombre.value = nom;
+                    inputBusqueda.value = `${cod} - ${nom}`;
+                    feedback.className = 'cuenta-feedback small mt-1 text-success fw-semibold';
+                    feedback.innerHTML = `<i class="bi bi-check2-circle"></i> [${cod}] ${nom} <span class="badge bg-light text-dark border ms-1">${tipo}</span>`;
+                } else {
+                    hiddenCodigo.value = '';
+                    hiddenNombre.value = '';
+                    feedback.className = 'cuenta-feedback small mt-1 text-danger';
+                    feedback.innerHTML = `<i class="bi bi-exclamation-circle"></i> Cuenta no encontrada o inactiva en el catálogo.`;
+                }
+            };
+
+            inputBusqueda.addEventListener('change', validarSeleccionCuenta);
+            inputBusqueda.addEventListener('input', () => {
+                if (!inputBusqueda.value) validarSeleccionCuenta();
+            });
+
+            // Exclusión mutua suave
+            inputDebe.addEventListener('input', () => {
+                const val = parseFloat(inputDebe.value) || 0;
+                if (val > 0) inputHaber.value = "0.00";
+                recalcularTotalesDiario();
+            });
+
+            inputHaber.addEventListener('input', () => {
+                const val = parseFloat(inputHaber.value) || 0;
+                if (val > 0) inputDebe.value = "0.00";
+                recalcularTotalesDiario();
+            });
+
+            btnEliminar.addEventListener('click', () => {
+                const totalFilas = tbody.querySelectorAll('tr').length;
+                if (totalFilas <= 2) {
+                    mostrarToast('Un asiento contable requiere al menos 2 líneas de movimiento.', 'warning');
+                    return;
+                }
+                tr.remove();
+                actualizarIndicesFilasDiario();
+                recalcularTotalesDiario();
+            });
+
+            actualizarIndicesFilasDiario();
+        }
+
+        function actualizarIndicesFilasDiario() {
+            const filas = document.querySelectorAll('#lineas-tbody tr');
+            filas.forEach((f, idx) => {
+                f.querySelector('.index-cell').textContent = idx + 1;
+            });
+        }
+
+        function recalcularTotalesDiario() {
+            let sumDebe = 0;
+            let sumHaber = 0;
+
+            const filas = document.querySelectorAll('#lineas-tbody tr');
+            filas.forEach(f => {
+                const d = parseFloat(f.querySelector('.input-debe').value) || 0;
+                const h = parseFloat(f.querySelector('.input-haber').value) || 0;
+                sumDebe += d;
+                sumHaber += h;
+            });
+
+            sumDebe = Math.round(sumDebe * 100) / 100;
+            sumHaber = Math.round(sumHaber * 100) / 100;
+            const diferencia = Math.round(Math.abs(sumDebe - sumHaber) * 100) / 100;
+
+            document.getElementById('total-debe').textContent = formatoNumero(sumDebe);
+            document.getElementById('total-haber').textContent = formatoNumero(sumHaber);
+
+            const alerta = document.getElementById('alerta-cuadre');
+            const alertaIcono = document.getElementById('alerta-icono');
+            const alertaMensaje = document.getElementById('alerta-mensaje');
+            const btnGuardar = document.getElementById('btn-guardar-asiento');
+
+            if (sumDebe === 0 && sumHaber === 0) {
+                alerta.className = 'alert alert-danger d-flex align-items-center gap-2 mb-3';
+                alertaIcono.className = 'bi bi-exclamation-triangle-fill fs-5';
+                alertaMensaje.innerHTML = '<strong>Asiento Vacío:</strong> Ingrese importes en Debe y Haber para balancear el asiento.';
+                btnGuardar.disabled = true;
+                btnGuardar.className = 'btn btn-danger px-4 fw-semibold';
+            } else if (diferencia !== 0) {
+                alerta.className = 'alert alert-danger d-flex align-items-center gap-2 mb-3';
+                alertaIcono.className = 'bi bi-exclamation-triangle-fill fs-5';
+                alertaMensaje.innerHTML = `<strong>Asiento Descuadrado:</strong> Diferencia de <strong>${formatoNumero(diferencia)}</strong> (Debe: ${formatoNumero(sumDebe)} | Haber: ${formatoNumero(sumHaber)}). La partida doble debe cuadrar exacto.`;
+                btnGuardar.disabled = true;
+                btnGuardar.className = 'btn btn-danger px-4 fw-semibold';
+            } else {
+                alerta.className = 'alert alert-success d-flex align-items-center gap-2 mb-3';
+                alertaIcono.className = 'bi bi-check-circle-fill fs-5 text-success';
+                alertaMensaje.innerHTML = `<strong>¡Asiento Balanceado!</strong> La partida doble cuadra exactamente por <strong>${formatoNumero(sumDebe)}</strong>. Listo para guardar.`;
+                btnGuardar.disabled = false;
+                btnGuardar.className = 'btn btn-success px-4 fw-semibold';
+            }
+        }
+
+        function resetearFormularioDiario() {
+            document.getElementById('asiento-concepto').value = '';
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('asiento-fecha').value = hoy;
+            const tbody = document.getElementById('lineas-tbody');
+            tbody.innerHTML = '';
+            crearFilaDiario();
+            crearFilaDiario();
+            recalcularTotalesDiario();
+        }
+
+        // Guardar Asiento con corrección completa de try-catch-finally
+        async function guardarAsiento(e) {
+            e.preventDefault();
+
+            const fecha = document.getElementById('asiento-fecha').value;
+            const concepto = document.getElementById('asiento-concepto').value.trim();
+
+            if (!fecha || !concepto) {
+                mostrarToast('Complete la fecha y el concepto del asiento.', 'warning');
+                return;
+            }
+
+            const filas = document.querySelectorAll('#lineas-tbody tr');
+            const lineas = [];
+
+            for (const f of filas) {
+                const hiddenCodigo = f.querySelector('.hidden-codigo-cuenta').value;
+                const hiddenNombre = f.querySelector('.hidden-nombre-cuenta').value;
+                const inputTexto = f.querySelector('.input-cuenta-rapida');
+                const debe = parseFloat(f.querySelector('.input-debe').value) || 0;
+                const haber = parseFloat(f.querySelector('.input-haber').value) || 0;
+
+                if (!hiddenCodigo || !hiddenNombre) {
+                    mostrarToast('Seleccione una cuenta contable válida en cada renglón.', 'warning');
+                    inputTexto.focus();
+                    return;
+                }
+
+                if (debe === 0 && haber === 0) {
+                    mostrarToast('Cada renglón debe tener un importe mayor a cero en Debe o Haber.', 'warning');
+                    return;
+                }
+
+                lineas.push({
+                    codigoCuenta: hiddenCodigo,
+                    nombreCuenta: hiddenNombre,
+                    debe,
+                    haber
+                });
+            }
+
+            const payload = {
+                fecha: new Date(fecha + 'T12:00:00').toISOString(),
+                concepto,
+                lineas
+            };
+
+            const btnGuardar = document.getElementById('btn-guardar-asiento');
+            btnGuardar.disabled = true;
+            btnGuardar.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Guardando...';
+
+            try {
+                const res = await fetch('/api/asientos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({ error: 'Error al registrar asiento' }));
+                    throw new Error(errorData.error || `HTTP ${res.status}`);
+                }
+
+                mostrarToast('¡Asiento contable registrado con éxito!', 'success');
+                resetearFormularioDiario();
+                await cargarHistorialAsientos();
+            } catch (err) {
+                console.error('Error al guardar asiento:', err);
+                mostrarToast('Error al guardar: ' + err.message, 'danger');
+            } finally {
+                // Restaurar texto original, limpiar spinner y reactivar el botón según cuadre
+                btnGuardar.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Guardar Asiento';
+                recalcularTotalesDiario();
+            }
+        }
+
+        // ========================================================
+        // 4. PESTAÑA: HISTORIAL DE ASIENTOS CON BÚSQUEDA EN TIEMPO REAL
+        // ========================================================
+        async function cargarHistorialAsientos() {
+            const tbody = document.getElementById('historial-asientos-tbody');
+            try {
+                const res = await fetch('/api/asientos');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                state.asientos = await res.json();
+                renderizarHistorialAsientos(document.getElementById('filtro-historial').value.trim().toLowerCase());
+            } catch (err) {
+                console.error('Error al cargar asientos:', err);
+                tbody.innerHTML = `
+                    <tr><td colspan="5" class="text-center py-4 text-danger"><i class="bi bi-x-circle me-1"></i> Error: ${err.message}</td></tr>
+                `;
+            }
+        }
+
+        function renderizarHistorialAsientos(filtro = '') {
+            const tbody = document.getElementById('historial-asientos-tbody');
+            if (!state.asientos || state.asientos.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="5" class="text-center py-4 text-muted"><i class="bi bi-inbox fs-4 d-block mb-1"></i>No hay asientos registrados aún en el libro diario.</td></tr>
+                `;
+                document.getElementById('contador-asientos').innerHTML = `<i class="bi bi-journal-check"></i> Asientos: <strong>0</strong>`;
+                return;
+            }
+
+            // Orden descendente por ID
+            let asientosFiltrados = [...state.asientos].sort((a, b) => (b.id || b.Id) - (a.id || a.Id));
+
+            if (filtro) {
+                const filtroLimpio = filtro.replace(/^#/, '');
+                asientosFiltrados = asientosFiltrados.filter(a => {
+                    const idStr = (a.id || a.Id || '').toString();
+                    const fechaRaw = a.fecha || a.Fecha || '';
+                    const fechaISO = fechaRaw.split('T')[0] || '';
+                    const concepto = (a.concepto || a.Concepto || '').toLowerCase();
+
+                    return idStr.includes(filtroLimpio) ||
+                           fechaISO.includes(filtro) ||
+                           concepto.includes(filtro);
+                });
+            }
+
+            document.getElementById('contador-asientos').innerHTML = `<i class="bi bi-journal-check"></i> Asientos: <strong>${asientosFiltrados.length}</strong>`;
+
+            if (asientosFiltrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="5" class="text-center py-4 text-muted">No se encontraron asientos con el criterio: "<strong>${filtro}</strong>"</td></tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = asientosFiltrados.map(a => {
+                const id = a.id || a.Id;
+                const fechaRaw = a.fecha || a.Fecha;
+                const fechaFormateada = fechaRaw ? new Date(fechaRaw).toLocaleDateString('es-ES') : '-';
+                const concepto = a.concepto || a.Concepto;
+                const lineas = a.lineas || a.Lineas || [];
+
+                let totalAsiento = 0;
+                let detalleHtml = '<div class="small">';
+                lineas.forEach(l => {
+                    const cod = l.codigoCuenta || l.CodigoCuenta;
+                    const nom = l.nombreCuenta || l.NombreCuenta;
+                    const debe = l.debe || l.Debe || 0;
+                    const haber = l.haber || l.Haber || 0;
+                    totalAsiento += debe;
+
+                    detalleHtml += `
+                        <div class="d-flex justify-content-between border-bottom py-1">
+                            <span><span class="badge bg-light text-dark border me-1">${cod}</span> ${nom}</span>
+                            <span class="font-monospace font-numeric">
+                                ${debe > 0 ? `<span class="text-primary fw-semibold">D: ${formatoNumero(debe)}</span>` : ''}
+                                ${haber > 0 ? `<span class="text-secondary">H: ${formatoNumero(haber)}</span>` : ''}
+                            </span>
+                        </div>
+                    `;
+                });
+                detalleHtml += '</div>';
+
+                return `
+                    <tr>
+                        <td class="text-center fw-bold font-monospace">#${id}</td>
+                        <td><span class="badge bg-light text-dark border"><i class="bi bi-calendar3 me-1"></i>${fechaFormateada}</span></td>
+                        <td><span class="fw-semibold">${concepto}</span></td>
+                        <td>${detalleHtml}</td>
+                        <td class="text-end fw-bold text-success font-monospace font-numeric fs-6">${formatoNumero(totalAsiento)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ========================================================
+        // 5. PESTAÑA: CATÁLOGO DE CUENTAS (SWITCH Y VALIDACIONES)
+        // ========================================================
+        function renderizarTablaCatalogo(filtro = '') {
+            const tbody = document.getElementById('catalogo-tbody');
+            if (!state.todasLasCuentas || state.todasLasCuentas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No hay cuentas disponibles en el catálogo.</td></tr>`;
+                return;
+            }
+
+            const cuentasFiltradas = state.todasLasCuentas.filter(c => {
+                const cod = (c.codigo || c.Codigo || '').toLowerCase();
+                const nom = (c.nombre || c.Nombre || '').toLowerCase();
+                return cod.includes(filtro) || nom.includes(filtro);
+            });
+
+            const total = state.todasLasCuentas.length;
+            const activas = state.todasLasCuentas.filter(c => (c.estaActiva !== undefined ? c.estaActiva : c.EstaActiva)).length;
+            const inactivas = total - activas;
+
+            document.getElementById('contador-cuentas-total').innerHTML = `<i class="bi bi-list-ul"></i> Total: <strong>${total}</strong>`;
+            document.getElementById('contador-cuentas-activas').innerHTML = `<i class="bi bi-check-circle"></i> Activas: <strong>${activas}</strong>`;
+            document.getElementById('contador-cuentas-inactivas').innerHTML = `<i class="bi bi-x-circle"></i> Inactivas: <strong>${inactivas}</strong>`;
+
+            if (cuentasFiltradas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No se encontraron cuentas con el criterio: "<strong>${filtro}</strong>"</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = cuentasFiltradas.map(c => {
+                const codigo = c.codigo || c.Codigo;
+                const nombre = c.nombre || c.Nombre;
+                const tipo = c.tipo || c.Tipo;
+                const naturaleza = c.naturaleza || c.Naturaleza;
+                const estaActiva = (c.estaActiva !== undefined) ? c.estaActiva : c.EstaActiva;
+                const permiteMov = (c.permiteMovimientos !== undefined) ? c.permiteMovimientos : c.PermiteMovimientos;
+
+                const tipoStr = (tipo || '').toString().toLowerCase();
+                let badgeTipoClass = 'bg-secondary';
+                if (tipoStr.includes('activo')) badgeTipoClass = 'badge-activo';
+                else if (tipoStr.includes('pasivo')) badgeTipoClass = 'badge-pasivo';
+                else if (tipoStr.includes('capital')) badgeTipoClass = 'badge-capital';
+                else if (tipoStr.includes('ingreso')) badgeTipoClass = 'badge-ingreso';
+                else if (tipoStr.includes('costo')) badgeTipoClass = 'badge-costo';
+                else if (tipoStr.includes('gasto')) badgeTipoClass = 'badge-gasto';
+
+                const esDeudora = (naturaleza || '').toString().toLowerCase().includes('deudora');
+                const badgeNat = esDeudora
+                    ? '<span class="badge bg-primary-subtle text-primary border border-primary-subtle">Deudora</span>'
+                    : '<span class="badge bg-warning-subtle text-dark border border-warning-subtle">Acreedora</span>';
+
+                return `
+                    <tr id="fila-cuenta-${codigo}" class="${!estaActiva ? 'table-light opacity-75' : ''}">
+                        <td class="text-center font-monospace fw-bold">${codigo}</td>
+                        <td>
+                            <div class="fw-semibold">${nombre}</div>
+                            ${!permiteMov ? '<span class="badge bg-light text-muted border" style="font-size:0.7rem;">Cuenta Rubro / Mayor</span>' : ''}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge ${badgeTipoClass} text-uppercase px-2 py-1">${tipo}</span>
+                        </td>
+                        <td class="text-center">${badgeNat}</td>
+                        <td class="text-center">
+                            <div class="d-inline-flex align-items-center gap-2">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input switch-cuenta" type="checkbox" role="switch"
+                                        id="switch-${codigo}" data-codigo="${codigo}" ${estaActiva ? 'checked' : ''}
+                                        style="cursor: pointer; width: 2.5em; height: 1.3em;">
+                                </div>
+                                <span class="badge ${estaActiva ? 'bg-success' : 'bg-secondary'}" id="badge-estado-${codigo}" style="width: 70px;">
+                                    ${estaActiva ? 'Activa' : 'Inactiva'}
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Asignar listeners a switches
+            document.querySelectorAll('.switch-cuenta').forEach(sw => {
+                sw.addEventListener('change', async (e) => {
+                    const switchEl = e.target;
+                    const codigo = switchEl.getAttribute('data-codigo');
+                    const nuevoEstadoDeseado = switchEl.checked;
+
+                    switchEl.disabled = true;
+
+                    try {
+                        const res = await fetch(`/api/cuentas/${codigo}/toggle-estado`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+
+                        if (!res.ok) {
+                            const errData = await res.json().catch(() => ({ error: 'Error al alternar estado.' }));
+                            const mensajeError = errData.error || `HTTP ${res.status}`;
+
+                            // Revertir switch
+                            switchEl.checked = !nuevoEstadoDeseado;
+                            mostrarAlertaGlobal(`No se pudo modificar la cuenta ${codigo}`, mensajeError);
+                            mostrarToast(mensajeError, 'danger');
+                            return;
+                        }
+
+                        const data = await res.json();
+                        const estadoConfirmado = (data.estaActiva !== undefined) ? data.estaActiva : data.EstaActiva;
+
+                        const badgeEstado = document.getElementById(`badge-estado-${codigo}`);
+                        if (badgeEstado) {
+                            badgeEstado.className = `badge ${estadoConfirmado ? 'bg-success' : 'bg-secondary'}`;
+                            badgeEstado.textContent = estadoConfirmado ? 'Activa' : 'Inactiva';
+                        }
+
+                        const fila = document.getElementById(`fila-cuenta-${codigo}`);
+                        if (fila) {
+                            if (!estadoConfirmado) fila.classList.add('table-light', 'opacity-75');
+                            else fila.classList.remove('table-light', 'opacity-75');
+                        }
+
+                        const cuentaObj = state.todasLasCuentas.find(c => (c.codigo || c.Codigo) === codigo);
+                        if (cuentaObj) {
+                            cuentaObj.estaActiva = estadoConfirmado;
+                            cuentaObj.EstaActiva = estadoConfirmado;
+                        }
+
+                        mostrarToast(`Cuenta [${codigo}] ahora está ${estadoConfirmado ? 'ACTIVA' : 'INACTIVA'}.`, 'success');
+
+                        const resOp = await fetch('/api/cuentas/operativas');
+                        if (resOp.ok) {
+                            state.cuentasOperativas = await resOp.json();
+                            actualizarDatalistOperativas();
+                        }
+                    } catch (netErr) {
+                        console.error('Error de red:', netErr);
+                        switchEl.checked = !nuevoEstadoDeseado;
+                        mostrarAlertaGlobal('Error de Conexión', netErr.message);
+                    } finally {
+                        switchEl.disabled = false;
+                        const total = state.todasLasCuentas.length;
+                        const activas = state.todasLasCuentas.filter(c => (c.estaActiva !== undefined ? c.estaActiva : c.EstaActiva)).length;
+                        document.getElementById('contador-cuentas-activas').innerHTML = `<i class="bi bi-check-circle"></i> Activas: <strong>${activas}</strong>`;
+                        document.getElementById('contador-cuentas-inactivas').innerHTML = `<i class="bi bi-x-circle"></i> Inactivas: <strong>${total - activas}</strong>`;
+                    }
+                });
+            });
+        }
+
+        // ========================================================
+        // 6. PESTAÑA: LIBRO MAYOR (CUENTAS T)
+        // ========================================================
+        async function cargarLibroMayor() {
+            const contenedor = document.getElementById('contenedor-cuentas-t');
+            try {
+                const [resMayor, resAsientos] = await Promise.all([
+                    fetch('/api/reportes/mayor'),
+                    fetch('/api/asientos')
+                ]);
+
+                if (!resMayor.ok) throw new Error(`HTTP ${resMayor.status}`);
+                state.mayor = await resMayor.json();
+
+                if (resAsientos.ok) {
+                    state.asientos = await resAsientos.json();
+                }
+
+                renderizarLibroMayor(document.getElementById('filtro-mayor').value.trim().toLowerCase());
+            } catch (err) {
+                console.error('Error al cargar mayor:', err);
+                contenedor.innerHTML = `
+                    <div class="col-12 text-center py-5 text-danger"><i class="bi bi-exclamation-triangle fs-3 d-block mb-2"></i>Error al cargar Libro Mayor: ${err.message}</div>
+                `;
+            }
+        }
+
+        function renderizarLibroMayor(filtro = '') {
+            const contenedor = document.getElementById('contenedor-cuentas-t');
+            if (!state.mayor || state.mayor.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="col-12 text-center py-5 text-muted"><i class="bi bi-inbox fs-3 d-block mb-2"></i>No hay movimientos registrados en el Libro Mayor.</div>
+                `;
+                return;
+            }
+
+            const cuentasFiltradas = state.mayor.filter(m => {
+                const cod = (m.codigo || m.Codigo || '').toLowerCase();
+                const nom = (m.nombre || m.Nombre || '').toLowerCase();
+                return cod.includes(filtro) || nom.includes(filtro);
+            });
+
+            if (cuentasFiltradas.length === 0) {
+                contenedor.innerHTML = `<div class="col-12 text-center py-5 text-muted">No se encontraron cuentas que coincidan con "${filtro}".</div>`;
+                return;
+            }
+
+            const movsPorCuenta = {};
+            (state.asientos || []).forEach(asiento => {
+                const asientoId = asiento.id || asiento.Id;
+                const lineas = asiento.lineas || asiento.Lineas || [];
+                lineas.forEach(l => {
+                    const cod = l.codigoCuenta || l.CodigoCuenta;
+                    if (!movsPorCuenta[cod]) movsPorCuenta[cod] = [];
+                    movsPorCuenta[cod].push({
+                        asientoId,
+                        debe: l.debe || l.Debe || 0,
+                        haber: l.haber || l.Haber || 0
+                    });
+                });
+            });
+
+            contenedor.innerHTML = cuentasFiltradas.map(cuenta => {
+                const codigo = cuenta.codigo || cuenta.Codigo;
+                const nombre = cuenta.nombre || cuenta.Nombre;
+                const tipo = cuenta.tipo || cuenta.Tipo;
+                const naturaleza = cuenta.naturaleza || cuenta.Naturaleza;
+                const totalDebe = cuenta.totalDebe || cuenta.TotalDebe || 0;
+                const totalHaber = cuenta.totalHaber || cuenta.TotalHaber || 0;
+                const saldoFinal = cuenta.saldoFinal || cuenta.SaldoFinal || 0;
+
+                const tipoStr = (tipo || '').toString().toLowerCase();
+                let badgeTipoClass = 'bg-secondary';
+                if (tipoStr.includes('activo')) badgeTipoClass = 'badge-activo';
+                else if (tipoStr.includes('pasivo')) badgeTipoClass = 'badge-pasivo';
+                else if (tipoStr.includes('capital')) badgeTipoClass = 'badge-capital';
+                else if (tipoStr.includes('ingreso')) badgeTipoClass = 'badge-ingreso';
+                else if (tipoStr.includes('costo')) badgeTipoClass = 'badge-costo';
+                else if (tipoStr.includes('gasto')) badgeTipoClass = 'badge-gasto';
+
+                const movs = movsPorCuenta[codigo] || [];
+                const movsDebe = movs.filter(m => m.debe > 0);
+                const movsHaber = movs.filter(m => m.haber > 0);
+
+                let movDebeHtml = movsDebe.length > 0 ? movsDebe.map(m => `
+                    <div class="cuenta-t-movement">
+                        <span class="concept">As.#${m.asientoId}</span>
+                        <span class="font-monospace font-numeric fw-semibold text-primary">${formatoNumero(m.debe)}</span>
+                    </div>
+                `).join('') : '<div class="text-muted text-center py-2 fst-italic" style="font-size:0.75rem;">Sin cargos</div>';
+
+                let movHaberHtml = movsHaber.length > 0 ? movsHaber.map(m => `
+                    <div class="cuenta-t-movement">
+                        <span class="concept">As.#${m.asientoId}</span>
+                        <span class="font-monospace font-numeric fw-semibold text-secondary">${formatoNumero(m.haber)}</span>
+                    </div>
+                `).join('') : '<div class="text-muted text-center py-2 fst-italic" style="font-size:0.75rem;">Sin abonos</div>';
+
+                const esDeudor = (naturaleza || '').toString().toLowerCase().includes('deudora');
+                const badgeNat = esDeudor
+                    ? '<span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size:0.7rem;">Deudora</span>'
+                    : '<span class="badge bg-warning-subtle text-dark border border-warning-subtle" style="font-size:0.7rem;">Acreedora</span>';
+
+                return `
+                    <div class="col-md-6 col-xl-4">
+                        <div class="cuenta-t-card">
+                            <div class="cuenta-t-header">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge bg-dark font-monospace">${codigo}</span>
+                                    <span class="badge ${badgeTipoClass} text-uppercase" style="font-size:0.7rem;">${tipo}</span>
+                                    ${badgeNat}
+                                </div>
+                                <h6 class="mb-0 fw-bold text-truncate" title="${nombre}">${nombre}</h6>
+                            </div>
+
+                            <div class="cuenta-t-grid">
+                                <div class="cuenta-t-col cuenta-t-col-debe">
+                                    <div class="cuenta-t-col-header">DEBE (Cargos)</div>
+                                    ${movDebeHtml}
+                                </div>
+                                <div class="cuenta-t-col">
+                                    <div class="cuenta-t-col-header">HABER (Abonos)</div>
+                                    ${movHaberHtml}
+                                </div>
+                            </div>
+
+                            <div class="cuenta-t-subtotals font-numeric">
+                                <div class="cuenta-t-subtotal-col cuenta-t-subtotal-debe font-monospace text-primary">
+                                    ${formatoNumero(totalDebe)}
+                                </div>
+                                <div class="cuenta-t-subtotal-col font-monospace text-secondary">
+                                    ${formatoNumero(totalHaber)}
+                                </div>
+                            </div>
+
+                            <div class="cuenta-t-footer font-numeric">
+                                <span class="small text-muted">Saldo Final (${naturaleza}):</span>
+                                <span class="font-monospace fs-6 ${saldoFinal >= 0 ? 'text-success' : 'text-danger'}">
+                                    ${formatoNumero(saldoFinal)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ========================================================
+        // 7. PESTAÑA: BALANZA DE COMPROBACIÓN
+        // ========================================================
+        async function cargarBalanzaComprobacion() {
+            try {
+                const res = await fetch('/api/reportes/balanza');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                state.balanza = await res.json();
+                renderizarBalanzaComprobacion();
+            } catch (err) {
+                console.error('Error al cargar balanza:', err);
+                const tbody = document.getElementById('balanza-tbody');
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger"><i class="bi bi-x-circle me-1"></i> Error al cargar balanza: ${err.message}</td></tr>`;
+            }
+        }
+
+        function renderizarBalanzaComprobacion() {
+            if (!state.balanza) return;
+
+            const cuentas = state.balanza.cuentas || state.balanza.filas || state.balanza.Filas || [];
+            const totalDebe = state.balanza.totalDebe ?? state.balanza.TotalDebe ?? 0;
+            const totalHaber = state.balanza.totalHaber ?? state.balanza.TotalHaber ?? 0;
+            const totalDeudor = state.balanza.totalSaldoDeudor ?? state.balanza.TotalSaldoDeudor ?? 0;
+            const totalAcreedor = state.balanza.totalSaldoAcreedor ?? state.balanza.TotalSaldoAcreedor ?? 0;
+            const estaCuadrada = state.balanza.estaCuadrada ?? state.balanza.EstaCuadrada ?? (totalDeudor === totalAcreedor);
+            const diferencia = state.balanza.diferencia ?? state.balanza.Diferencia ?? Math.abs(totalDeudor - totalAcreedor);
+
+            // Banner
+            const banner = document.getElementById('banner-balanza');
+            const icono = document.getElementById('banner-balanza-icono');
+            const titulo = document.getElementById('banner-balanza-titulo');
+            const desc = document.getElementById('banner-balanza-descripcion');
+            const badge = document.getElementById('banner-balanza-badge');
+
+            if (estaCuadrada && diferencia === 0) {
+                banner.className = 'alert alert-success d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm border-success';
+                icono.className = 'bi bi-shield-check fs-2 text-success';
+                titulo.textContent = '¡Balanza de Comprobación en Perfecto Equilibrio!';
+                desc.textContent = `Saldos Deudores (${formatoNumero(totalDeudor)}) son exactamente iguales a Saldos Acreedores (${formatoNumero(totalAcreedor)}).`;
+                badge.className = 'badge bg-success fs-6 px-3 py-2';
+                badge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Balanza Cuadrada';
+            } else {
+                banner.className = 'alert alert-danger d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm border-danger';
+                icono.className = 'bi bi-exclamation-triangle-fill fs-2 text-danger';
+                titulo.textContent = 'Descuadre en Balanza de Comprobación';
+                desc.textContent = `Existe una discrepancia de ${formatoNumero(diferencia)} entre Saldos Deudores (${formatoNumero(totalDeudor)}) y Acreedores (${formatoNumero(totalAcreedor)}).`;
+                badge.className = 'badge bg-danger fs-6 px-3 py-2';
+                badge.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i> Descuadrada';
+            }
+
+            // Filas
+            const tbody = document.getElementById('balanza-tbody');
+            if (cuentas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No hay movimientos contables registrados para generar la balanza.</td></tr>`;
+            } else {
+                tbody.innerHTML = cuentas.map(c => {
+                    const cod = c.codigo || c.Codigo;
+                    const nom = c.nombre || c.Nombre;
+                    const debe = c.totalDebe ?? c.TotalDebe ?? 0;
+                    const haber = c.totalHaber ?? c.TotalHaber ?? 0;
+                    const deudor = c.saldoDeudor ?? c.SaldoDeudor ?? 0;
+                    const acreedor = c.saldoAcreedor ?? c.SaldoAcreedor ?? 0;
+
+                    return `
+                        <tr class="font-numeric">
+                            <td class="text-center font-monospace fw-bold">${cod}</td>
+                            <td>${nom}</td>
+                            <td class="text-end font-monospace">${formatoNumero(debe)}</td>
+                            <td class="text-end font-monospace">${formatoNumero(haber)}</td>
+                            <td class="text-end font-monospace ${deudor > 0 ? 'fw-bold text-primary' : 'text-muted'}">${formatoNumero(deudor)}</td>
+                            <td class="text-end font-monospace ${acreedor > 0 ? 'fw-bold text-success' : 'text-muted'}">${formatoNumero(acreedor)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Totales pie
+            document.getElementById('balanza-total-debe').textContent = formatoNumero(totalDebe);
+            document.getElementById('balanza-total-haber').textContent = formatoNumero(totalHaber);
+            document.getElementById('balanza-total-deudor').textContent = formatoNumero(totalDeudor);
+            document.getElementById('balanza-total-acreedor').textContent = formatoNumero(totalAcreedor);
+        }
+
+        // ========================================================
+        // 8. PESTAÑA: ESTADOS FINANCIEROS (BALANCE, FLUJO, CAPITAL)
+        // ========================================================
+        async function cargarTodosLosEstadosFinancieros() {
+            await Promise.all([
+                cargarBalanceGeneral(),
+                cargarFlujoEfectivo(),
+                cargarVariacionCapital()
+            ]);
+        }
+
+        // 8.1 Balance General
+        async function cargarBalanceGeneral() {
+            try {
+                const res = await fetch('/api/reportes/balance');
+                if (!res.ok) {
+                    const errJson = await res.json().catch(() => ({ error: 'Error al consultar balance general.' }));
+                    throw new Error(errJson.error || `HTTP ${res.status}`);
+                }
+                state.balance = await res.json();
+                renderizarBalanceGeneral();
+            } catch (err) {
+                console.error('Error al cargar balance:', err);
+                const banner = document.getElementById('banner-equilibrio');
+                banner.className = 'alert alert-warning d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm border-warning';
+                document.getElementById('banner-icono').className = 'bi bi-exclamation-triangle fs-2 text-warning';
+                document.getElementById('banner-titulo').textContent = 'Información de Balance';
+                document.getElementById('banner-descripcion').textContent = err.message;
+                document.getElementById('banner-badge').className = 'badge bg-warning text-dark fs-6 px-3 py-2';
+                document.getElementById('banner-badge').textContent = 'Aviso Contable';
+            }
+        }
+
+        function renderizarBalanceGeneral() {
+            if (!state.balance) return;
+
+            const activo = state.balance.activo ?? state.balance.Activo ?? 0;
+            const pasivo = state.balance.pasivo ?? state.balance.Pasivo ?? 0;
+            const capital = state.balance.capital ?? state.balance.Capital ?? 0;
+            const utilidadNeta = state.balance.utilidadNeta ?? state.balance.UtilidadNeta ?? 0;
+
+            document.getElementById('kpi-activo').textContent = formatoNumero(activo);
+            document.getElementById('kpi-pasivo').textContent = formatoNumero(pasivo);
+            document.getElementById('kpi-capital').textContent = formatoNumero(capital);
+            document.getElementById('kpi-utilidad').textContent = formatoNumero(utilidadNeta);
+
+            const cardUtilidad = document.getElementById('card-utilidad');
+            const iconoUtilidad = document.getElementById('icono-utilidad');
+            const descUtilidad = document.getElementById('kpi-utilidad-desc');
+            if (utilidadNeta >= 0) {
+                cardUtilidad.className = 'card kpi-card kpi-utilidad p-3 shadow-sm';
+                iconoUtilidad.className = 'bi bi-graph-up-arrow fs-4';
+                descUtilidad.textContent = 'Resultado Positivo (Ganancia)';
+            } else {
+                cardUtilidad.className = 'card kpi-card kpi-utilidad-negativa p-3 shadow-sm';
+                iconoUtilidad.className = 'bi bi-graph-down-arrow fs-4';
+                descUtilidad.textContent = 'Resultado Negativo (Pérdida)';
+            }
+
+            const ladoDerecho = Math.round((pasivo + capital) * 100) / 100;
+            const ladoIzquierdo = Math.round(activo * 100) / 100;
+            const diferencia = Math.round(Math.abs(ladoIzquierdo - ladoDerecho) * 100) / 100;
+            const estaEnEquilibrio = (diferencia === 0);
+
+            document.getElementById('lado-izq').textContent = formatoNumero(ladoIzquierdo);
+            document.getElementById('lado-der').textContent = formatoNumero(ladoDerecho);
+            document.getElementById('diferencia-balance').textContent = formatoNumero(diferencia);
+            document.getElementById('resumen-utilidad-capital').textContent = formatoNumero(utilidadNeta);
+            document.getElementById('ecuacion-valores').textContent = `${formatoNumero(ladoIzquierdo)} = ${formatoNumero(pasivo)} + ${formatoNumero(capital)}`;
+
+            const banner = document.getElementById('banner-equilibrio');
+            const bannerIcono = document.getElementById('banner-icono');
+            const bannerTitulo = document.getElementById('banner-titulo');
+            const bannerDesc = document.getElementById('banner-descripcion');
+            const bannerBadge = document.getElementById('banner-badge');
+
+            if (estaEnEquilibrio) {
+                banner.className = 'alert alert-success d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm border-success';
+                bannerIcono.className = 'bi bi-shield-check fs-2 text-success';
+                bannerTitulo.textContent = '¡Ecuación Contable en Equilibrio!';
+                bannerDesc.textContent = `Activo (${formatoNumero(ladoIzquierdo)}) = Pasivo (${formatoNumero(pasivo)}) + Capital (${formatoNumero(capital)}). Balance cuadrado.`;
+                bannerBadge.className = 'badge bg-success fs-6 px-3 py-2';
+                bannerBadge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Balance Cuadrado';
+            } else {
+                banner.className = 'alert alert-danger d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm border-danger';
+                bannerIcono.className = 'bi bi-exclamation-triangle-fill fs-2 text-danger';
+                bannerTitulo.textContent = 'Descuadre en Balance General';
+                bannerDesc.textContent = `Diferencia de ${formatoNumero(diferencia)}. Revise los asientos registrados.`;
+                bannerBadge.className = 'badge bg-danger fs-6 px-3 py-2';
+                bannerBadge.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i> Descuadre';
+            }
+        }
+
+        // 8.2 Estado de Flujo de Efectivo
+        async function cargarFlujoEfectivo() {
+            try {
+                const res = await fetch('/api/reportes/flujo-efectivo');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                state.flujo = await res.json();
+                renderizarFlujoEfectivo();
+            } catch (err) {
+                console.error('Error al cargar flujo de efectivo:', err);
+                mostrarToast('Error al cargar flujo de efectivo: ' + err.message, 'danger');
+            }
+        }
+
+        function renderizarFlujoEfectivo() {
+            if (!state.flujo) return;
+
+            const totalEntradas = state.flujo.totalEntradas ?? state.flujo.TotalEntradas ?? 0;
+            const totalSalidas = state.flujo.totalSalidas ?? state.flujo.TotalSalidas ?? 0;
+            const variacionNeta = state.flujo.variacionNeta ?? state.flujo.VariacionNeta ?? 0;
+            const saldoFinal = state.flujo.saldoFinal ?? state.flujo.SaldoFinal ?? 0;
+            const entradas = state.flujo.entradas ?? state.flujo.Entradas ?? [];
+            const salidas = state.flujo.salidas ?? state.flujo.Salidas ?? [];
+
+            // KPIs
+            document.getElementById('kpi-flujo-entradas').textContent = formatoNumero(totalEntradas);
+            document.getElementById('kpi-flujo-salidas').textContent = formatoNumero(totalSalidas);
+            document.getElementById('kpi-flujo-variacion').textContent = formatoNumero(variacionNeta);
+            document.getElementById('kpi-flujo-saldo').textContent = formatoNumero(saldoFinal);
+
+            document.getElementById('badge-total-entradas').textContent = formatoNumero(totalEntradas);
+            document.getElementById('badge-total-salidas').textContent = formatoNumero(totalSalidas);
+
+            // Tabla Entradas
+            const tbodyEntradas = document.getElementById('flujo-entradas-tbody');
+            if (entradas.length === 0) {
+                tbodyEntradas.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-muted">No se registran entradas de efectivo.</td></tr>`;
+            } else {
+                tbodyEntradas.innerHTML = entradas.map(e => `
+                    <tr class="font-numeric">
+                        <td class="font-monospace fw-bold">#${e.asientoId ?? e.AsientoId}</td>
+                        <td>${e.fecha ? new Date(e.fecha).toLocaleDateString('es-ES') : '-'}</td>
+                        <td>${e.concepto ?? e.Concepto}</td>
+                        <td><span class="badge bg-success-subtle text-success border border-success-subtle">${e.categoria ?? e.Categoria}</span></td>
+                        <td class="text-end fw-bold text-success font-monospace">${formatoNumero(e.monto ?? e.Monto)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Tabla Salidas
+            const tbodySalidas = document.getElementById('flujo-salidas-tbody');
+            if (salidas.length === 0) {
+                tbodySalidas.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-muted">No se registran salidas de efectivo.</td></tr>`;
+            } else {
+                tbodySalidas.innerHTML = salidas.map(s => `
+                    <tr class="font-numeric">
+                        <td class="font-monospace fw-bold">#${s.asientoId ?? s.AsientoId}</td>
+                        <td>${s.fecha ? new Date(s.fecha).toLocaleDateString('es-ES') : '-'}</td>
+                        <td>${s.concepto ?? s.Concepto}</td>
+                        <td><span class="badge bg-warning-subtle text-dark border border-warning-subtle">${s.categoria ?? s.Categoria}</span></td>
+                        <td class="text-end fw-bold text-danger font-monospace">${formatoNumero(s.monto ?? s.Monto)}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // 8.3 Estado de Variación en el Capital
+        async function cargarVariacionCapital() {
+            try {
+                const res = await fetch('/api/reportes/variacion-capital');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                state.variacionCapital = await res.json();
+                renderizarVariacionCapital();
+            } catch (err) {
+                console.error('Error al cargar variación de capital:', err);
+                mostrarToast('Error al cargar variación de capital: ' + err.message, 'danger');
+            }
+        }
+
+        function renderizarVariacionCapital() {
+            if (!state.variacionCapital) return;
+
+            const inicial = state.variacionCapital.capitalInicial ?? state.variacionCapital.CapitalInicial ?? 0;
+            const aportes = state.variacionCapital.aportes ?? state.variacionCapital.Aportes ?? 0;
+            const utilidad = state.variacionCapital.utilidadEjercicio ?? state.variacionCapital.UtilidadEjercicio ?? 0;
+            const final = state.variacionCapital.capitalFinal ?? state.variacionCapital.CapitalFinal ?? 0;
+
+            document.getElementById('kpi-cap-inicial').textContent = formatoNumero(inicial);
+            document.getElementById('kpi-cap-aportes').textContent = formatoNumero(aportes);
+            document.getElementById('kpi-cap-utilidad').textContent = formatoNumero(utilidad);
+            document.getElementById('kpi-cap-final').textContent = formatoNumero(final);
+
+            const cardUtil = document.getElementById('card-cap-utilidad');
+            if (utilidad < 0) {
+                cardUtil.className = 'card kpi-card bg-danger p-3 shadow-sm';
+            } else {
+                cardUtil.className = 'card kpi-card bg-success p-3 shadow-sm';
+            }
+
+            document.getElementById('tabla-cap-inicial').textContent = formatoNumero(inicial);
+            document.getElementById('tabla-cap-aportes').textContent = formatoNumero(aportes);
+            document.getElementById('tabla-cap-utilidad').textContent = formatoNumero(utilidad);
+            document.getElementById('tabla-cap-final').textContent = formatoNumero(final);
+        }
+    </script>
+</body>
 </html>

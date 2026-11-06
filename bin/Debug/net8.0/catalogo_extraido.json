@@ -1,0 +1,146 @@
+[
+  {
+    "codigo": "1",
+    "nombre": "ACTIVO",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": false,
+    "estaActiva": true
+  },
+  {
+    "codigo": "11",
+    "nombre": "ACTIVO CIRCULANTE",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": false,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1101",
+    "nombre": "Caja General",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1101.01",
+    "nombre": "Caja Chica",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1102",
+    "nombre": "Bancos Nacionales",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "2",
+    "nombre": "PASIVO",
+    "tipo": "Pasivo",
+    "naturaleza": "Acreedora",
+    "permiteMovimientos": false,
+    "estaActiva": true
+  },
+  {
+    "codigo": "21",
+    "nombre": "PASIVO A CORTO PLAZO",
+    "tipo": "Pasivo",
+    "naturaleza": "Acreedora",
+    "permiteMovimientos": false,
+    "estaActiva": true
+  },
+  {
+    "codigo": "2101",
+    "nombre": "Proveedores",
+    "tipo": "Pasivo",
+    "naturaleza": "Acreedora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "2102",
+    "nombre": "IVA por Pagar",
+    "tipo": "Pasivo",
+    "naturaleza": "Acreedora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "3",
+    "nombre": "CAPITAL",
+    "tipo": "Capital",
+    "naturaleza": "Acreedora",
+    "permiteMovimientos": false,
+    "estaActiva": true
+  },
+  {
+    "codigo": "3101",
+    "nombre": "Capital Social",
+    "tipo": "Capital",
+    "naturaleza": "Acreedora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "4",
+    "nombre": "INGRESOS",
+    "tipo": "Ingreso",
+    "naturaleza": "Acreedora",
+    "permiteMovimientos": false,
+    "estaActiva": true
+  },
+  {
+    "codigo": "4101",
+    "nombre": "Ventas de Mercancías",
+    "tipo": "Ingreso",
+    "naturaleza": "Acreedora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "5",
+    "nombre": "COSTOS",
+    "tipo": "Costo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": false,
+    "estaActiva": true
+  },
+  {
+    "codigo": "5101",
+    "nombre": "Costo de Ventas",
+    "tipo": "Costo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "6",
+    "nombre": "GASTOS",
+    "tipo": "Gasto",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": false,
+    "estaActiva": true
+  },
+  {
+    "codigo": "6101",
+    "nombre": "Gastos de Administración",
+    "tipo": "Gasto",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "6102",
+    "nombre": "Gastos de Venta",
+    "tipo": "Gasto",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  }
+]

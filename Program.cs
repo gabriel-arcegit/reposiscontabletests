@@ -11,16 +11,33 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 builder.Services.AddSingleton<IRepositorioContable, SqliteRepositorioContable>();
-builder.Services.AddSingleton<CalculadoraFiscalService>();
 builder.Services.AddTransient<ReportesService>();
+builder.Services.AddTransient<GestionCuentasService>();
+builder.Services.AddTransient<ContabilidadServicios>();
 
 var app = builder.Build();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+app.MapGet("/api/cuentas", (IRepositorioContable repo) =>
+    Results.Ok(repo.ObtenerCuentas()));
+
 app.MapGet("/api/cuentas/operativas", (IRepositorioContable repo) =>
     Results.Ok(repo.ObtenerCuentasOperativas()));
+
+app.MapPut("/api/cuentas/{codigo}/toggle-estado", (string codigo, GestionCuentasService service) =>
+{
+    try
+    {
+        var nuevoEstado = service.AlternarEstadoCuenta(codigo);
+        return Results.Ok(new { codigo, estaActiva = nuevoEstado });
+    }
+    catch (DominioContableException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
 
 app.MapGet("/api/asientos", (IRepositorioContable repo) =>
     Results.Ok(repo.ObtenerAsientos()));
@@ -54,22 +71,22 @@ app.MapGet("/api/reportes/balance", (ReportesService reportes) =>
     }
 });
 
-app.MapPost("/api/fiscal/calcular", (CalculoFiscalRequest req, CalculadoraFiscalService calc) =>
+app.MapGet("/api/reportes/balanza", (ContabilidadServicios service) =>
 {
-    if (req.AplicarImpuestos.HasValue) calc.AplicarImpuestos = req.AplicarImpuestos.Value;
-    if (req.TasaIva.HasValue) calc.TasaIva = req.TasaIva.Value;
-    if (req.TasaRetencion.HasValue) calc.TasaRetencion = req.TasaRetencion.Value;
-    if (req.UmbralRetencion.HasValue) calc.UmbralRetencion = req.UmbralRetencion.Value;
-
-    return Results.Ok(calc.Liquidar(req.Monto, req.IncluyeIva));
+    try
+    {
+        return Results.Ok(service.CalcularBalanzaComprobacion());
+    }
+    catch (DominioContableException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
 });
 
-app.Run();
+app.MapGet("/api/reportes/flujo-efectivo", (ContabilidadServicios service) =>
+    Results.Ok(service.CalcularFlujoEfectivo()));
 
-public record CalculoFiscalRequest(
-    decimal Monto,
-    bool IncluyeIva = false,
-    bool? AplicarImpuestos = null,
-    decimal? TasaIva = null,
-    decimal? TasaRetencion = null,
-    decimal? UmbralRetencion = null);
+app.MapGet("/api/reportes/variacion-capital", (ContabilidadServicios service) =>
+    Results.Ok(service.CalcularVariacionCapital()));
+
+app.Run();

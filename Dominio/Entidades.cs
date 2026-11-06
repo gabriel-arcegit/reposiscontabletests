@@ -33,7 +33,7 @@ public enum NaturalezaSaldo
 /// <summary>
 /// Representa una cuenta del catálogo contable.
 /// </summary>
-public class CuentaContable(string codigo, string nombre, TipoCuenta tipo, NaturalezaSaldo naturaleza, bool permiteMovimientos = true)
+public class CuentaContable(string codigo, string nombre, TipoCuenta tipo, NaturalezaSaldo naturaleza, bool permiteMovimientos = true, bool estaActiva = true)
 {
     public string Codigo { get; } = !string.IsNullOrWhiteSpace(codigo)
         ? codigo.Trim()
@@ -46,6 +46,7 @@ public class CuentaContable(string codigo, string nombre, TipoCuenta tipo, Natur
     public TipoCuenta Tipo { get; } = tipo;
     public NaturalezaSaldo Naturaleza { get; } = naturaleza;
     public bool PermiteMovimientos { get; } = permiteMovimientos;
+    public bool EstaActiva { get; } = estaActiva;
 }
 
 /// <summary>
@@ -124,4 +125,5 @@ public interface IRepositorioContable
     IEnumerable<CuentaContable> ObtenerCuentasOperativas();
     void GuardarAsiento(AsientoDiario asiento);
     IEnumerable<AsientoDiario> ObtenerAsientos();
+    void ActualizarEstadoCuenta(string codigo, bool estaActiva);
 }

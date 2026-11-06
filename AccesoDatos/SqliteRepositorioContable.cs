@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Data.Sqlite;
 using SistemaContable.Dominio;
 
@@ -7,13 +9,22 @@ public class SqliteRepositorioContable : IRepositorioContable
 {
     private readonly string _connectionString;
 
+    private record CuentaSeedDto(
+        [property: JsonPropertyName("codigo")] string? Codigo,
+        [property: JsonPropertyName("nombre")] string? Nombre,
+        [property: JsonPropertyName("tipo")] string? Tipo,
+        [property: JsonPropertyName("naturaleza")] string? Naturaleza,
+        [property: JsonPropertyName("permiteMovimientos")] bool PermiteMovimientos = true,
+        [property: JsonPropertyName("estaActiva")] bool EstaActiva = true
+    );
+
     public SqliteRepositorioContable(string connectionString = "Data Source=contabilidad.db")
     {
         _connectionString = connectionString;
-        InicializarBaseDatos();
+        InicializarBD();
     }
 
-    private void InicializarBaseDatos()
+    public void InicializarBD()
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
@@ -26,7 +37,8 @@ public class SqliteRepositorioContable : IRepositorioContable
                     Nombre TEXT NOT NULL,
                     Tipo INTEGER NOT NULL,
                     Naturaleza INTEGER NOT NULL,
-                    PermiteMovimientos INTEGER NOT NULL DEFAULT 1
+                    PermiteMovimientos INTEGER NOT NULL DEFAULT 1,
+                    EstaActiva INTEGER NOT NULL DEFAULT 1
                 );
 
                 CREATE TABLE IF NOT EXISTS Asientos (
@@ -47,12 +59,106 @@ public class SqliteRepositorioContable : IRepositorioContable
             cmd.ExecuteNonQuery();
         }
 
+        // Migración preventiva: si la tabla Cuentas existía previamente, asegurar la columna EstaActiva
+        using (var checkColCmd = connection.CreateCommand())
+        {
+            checkColCmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('Cuentas') WHERE name = 'EstaActiva';";
+            var existeColumna = Convert.ToInt32(checkColCmd.ExecuteScalar()) > 0;
+            if (!existeColumna)
+            {
+                using var alterCmd = connection.CreateCommand();
+                alterCmd.CommandText = "ALTER TABLE Cuentas ADD COLUMN EstaActiva INTEGER NOT NULL DEFAULT 1;";
+                alterCmd.ExecuteNonQuery();
+            }
+        }
+
         using (var checkCmd = connection.CreateCommand())
         {
             checkCmd.CommandText = "SELECT COUNT(*) FROM Cuentas;";
             var count = Convert.ToInt32(checkCmd.ExecuteScalar());
             if (count == 0)
             {
+                // Buscar si existe el archivo catalogo_extraido.json
+                string[] posiblesRutas = [
+                    Path.Combine(Directory.GetCurrentDirectory(), "catalogo_extraido.json"),
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "catalogo_extraido.json"),
+                    "catalogo_extraido.json"
+                ];
+
+                string? rutaJson = posiblesRutas.FirstOrDefault(File.Exists);
+
+                if (rutaJson != null)
+                {
+                    try
+                    {
+                        var jsonContenido = File.ReadAllText(rutaJson);
+                        var opciones = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var cuentasJson = JsonSerializer.Deserialize<List<CuentaSeedDto>>(jsonContenido, opciones);
+
+                        if (cuentasJson != null && cuentasJson.Count > 0)
+                        {
+                            using var seedTx = connection.BeginTransaction();
+                            using var insertCmd = connection.CreateCommand();
+                            insertCmd.Transaction = seedTx;
+                            insertCmd.CommandText = @"
+                                INSERT INTO Cuentas (Codigo, Nombre, Tipo, Naturaleza, PermiteMovimientos, EstaActiva)
+                                VALUES ($cod, $nom, $tipo, $nat, $permite, $activa);";
+
+                            var pCod = insertCmd.Parameters.Add("$cod", SqliteType.Text);
+                            var pNom = insertCmd.Parameters.Add("$nom", SqliteType.Text);
+                            var pTipo = insertCmd.Parameters.Add("$tipo", SqliteType.Integer);
+                            var pNat = insertCmd.Parameters.Add("$nat", SqliteType.Integer);
+                            var pPermite = insertCmd.Parameters.Add("$permite", SqliteType.Integer);
+                            var pActiva = insertCmd.Parameters.Add("$activa", SqliteType.Integer);
+
+                            foreach (var c in cuentasJson)
+                            {
+                                if (string.IsNullOrWhiteSpace(c.Codigo) || string.IsNullOrWhiteSpace(c.Nombre))
+                                    continue;
+
+                                if (!Enum.TryParse<TipoCuenta>(c.Tipo, true, out var tipoEnum))
+                                {
+                                    var primerDigito = c.Codigo.Trim().FirstOrDefault(char.IsDigit);
+                                    tipoEnum = primerDigito switch
+                                    {
+                                        '1' => TipoCuenta.Activo,
+                                        '2' => TipoCuenta.Pasivo,
+                                        '3' => TipoCuenta.Capital,
+                                        '4' => TipoCuenta.Ingreso,
+                                        '5' => TipoCuenta.Costo,
+                                        '6' => TipoCuenta.Gasto,
+                                        _ => TipoCuenta.Activo
+                                    };
+                                }
+
+                                if (!Enum.TryParse<NaturalezaSaldo>(c.Naturaleza, true, out var natEnum))
+                                {
+                                    natEnum = (tipoEnum == TipoCuenta.Activo || tipoEnum == TipoCuenta.Costo || tipoEnum == TipoCuenta.Gasto)
+                                        ? NaturalezaSaldo.Deudora
+                                        : NaturalezaSaldo.Acreedora;
+                                }
+
+                                pCod.Value = c.Codigo.Trim();
+                                pNom.Value = c.Nombre.Trim();
+                                pTipo.Value = (int)tipoEnum;
+                                pNat.Value = (int)natEnum;
+                                pPermite.Value = c.PermiteMovimientos ? 1 : 0;
+                                pActiva.Value = c.EstaActiva ? 1 : 0;
+
+                                insertCmd.ExecuteNonQuery();
+                            }
+
+                            seedTx.Commit();
+                            return;
+                        }
+                    }
+                    catch
+                    {
+                        // En caso de cualquier error al leer el JSON, proceder con semilla por defecto
+                    }
+                }
+
+                // Semilla por defecto si no existe catalogo_extraido.json
                 var semilla = new (string Codigo, string Nombre, TipoCuenta Tipo, NaturalezaSaldo Naturaleza)[]
                 {
                     ("1101", "Caja", TipoCuenta.Activo, NaturalezaSaldo.Deudora),
@@ -67,21 +173,21 @@ public class SqliteRepositorioContable : IRepositorioContable
                     ("6101", "Gastos", TipoCuenta.Gasto, NaturalezaSaldo.Deudora)
                 };
 
-                using var seedTx = connection.BeginTransaction();
+                using var fallbackTx = connection.BeginTransaction();
                 foreach (var c in semilla)
                 {
                     using var insertCmd = connection.CreateCommand();
-                    insertCmd.Transaction = seedTx;
+                    insertCmd.Transaction = fallbackTx;
                     insertCmd.CommandText = @"
-                        INSERT INTO Cuentas (Codigo, Nombre, Tipo, Naturaleza, PermiteMovimientos)
-                        VALUES ($cod, $nom, $tipo, $nat, 1);";
+                        INSERT INTO Cuentas (Codigo, Nombre, Tipo, Naturaleza, PermiteMovimientos, EstaActiva)
+                        VALUES ($cod, $nom, $tipo, $nat, 1, 1);";
                     insertCmd.Parameters.AddWithValue("$cod", c.Codigo);
                     insertCmd.Parameters.AddWithValue("$nom", c.Nombre);
                     insertCmd.Parameters.AddWithValue("$tipo", (int)c.Tipo);
                     insertCmd.Parameters.AddWithValue("$nat", (int)c.Naturaleza);
                     insertCmd.ExecuteNonQuery();
                 }
-                seedTx.Commit();
+                fallbackTx.Commit();
             }
         }
     }
@@ -91,7 +197,7 @@ public class SqliteRepositorioContable : IRepositorioContable
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
         using var cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT Codigo, Nombre, Tipo, Naturaleza, PermiteMovimientos FROM Cuentas ORDER BY Codigo;";
+        cmd.CommandText = "SELECT Codigo, Nombre, Tipo, Naturaleza, PermiteMovimientos, EstaActiva FROM Cuentas ORDER BY Codigo;";
         using var reader = cmd.ExecuteReader();
         var cuentas = new List<CuentaContable>();
         while (reader.Read())
@@ -101,7 +207,8 @@ public class SqliteRepositorioContable : IRepositorioContable
                 reader.GetString(1),
                 (TipoCuenta)reader.GetInt32(2),
                 (NaturalezaSaldo)reader.GetInt32(3),
-                reader.GetInt32(4) == 1
+                reader.GetInt32(4) == 1,
+                reader.GetInt32(5) == 1
             ));
         }
         return cuentas;
@@ -112,7 +219,7 @@ public class SqliteRepositorioContable : IRepositorioContable
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
         using var cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT Codigo, Nombre, Tipo, Naturaleza, PermiteMovimientos FROM Cuentas WHERE PermiteMovimientos = 1 ORDER BY Codigo;";
+        cmd.CommandText = "SELECT Codigo, Nombre, Tipo, Naturaleza, PermiteMovimientos, EstaActiva FROM Cuentas WHERE PermiteMovimientos = 1 AND EstaActiva = 1 ORDER BY Codigo;";
         using var reader = cmd.ExecuteReader();
         var cuentas = new List<CuentaContable>();
         while (reader.Read())
@@ -122,10 +229,26 @@ public class SqliteRepositorioContable : IRepositorioContable
                 reader.GetString(1),
                 (TipoCuenta)reader.GetInt32(2),
                 (NaturalezaSaldo)reader.GetInt32(3),
-                true
+                reader.GetInt32(4) == 1,
+                reader.GetInt32(5) == 1
             ));
         }
         return cuentas;
+    }
+
+    public void ActualizarEstadoCuenta(string codigo, bool estaActiva)
+    {
+        if (string.IsNullOrWhiteSpace(codigo))
+            throw new ArgumentException("El código de la cuenta no puede estar vacío.", nameof(codigo));
+
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = "UPDATE Cuentas SET EstaActiva = @estado WHERE Codigo = @codigo;";
+        cmd.Parameters.AddWithValue("@estado", estaActiva ? 1 : 0);
+        cmd.Parameters.AddWithValue("@codigo", codigo.Trim());
+        cmd.ExecuteNonQuery();
     }
 
     public void GuardarAsiento(AsientoDiario asiento)
@@ -218,4 +341,3 @@ public class SqliteRepositorioContable : IRepositorioContable
         return asientos;
     }
 }
-
