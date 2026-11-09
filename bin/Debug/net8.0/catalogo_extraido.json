@@ -24,16 +24,112 @@
     "estaActiva": true
   },
   {
-    "codigo": "1101.01",
-    "nombre": "Caja Chica",
+    "codigo": "1102",
+    "nombre": "Bancos",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": false,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1102.01",
+    "nombre": "BAC - Córdobas",
     "tipo": "Activo",
     "naturaleza": "Deudora",
     "permiteMovimientos": true,
     "estaActiva": true
   },
   {
-    "codigo": "1102",
-    "nombre": "Bancos Nacionales",
+    "codigo": "1102.02",
+    "nombre": "BAC - Dólares",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1102.03",
+    "nombre": "Banpro - Córdobas",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1102.04",
+    "nombre": "Banpro - Dólares",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1102.05",
+    "nombre": "Lafise - Córdobas",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1102.06",
+    "nombre": "Lafise - Dólares",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1102.07",
+    "nombre": "BDF - Córdobas",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1102.08",
+    "nombre": "BDF - Dólares",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1102.09",
+    "nombre": "Ficohsa - Córdobas",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1102.10",
+    "nombre": "Ficohsa - Dólares",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1103",
+    "nombre": "Inventario",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1104",
+    "nombre": "Clientes",
+    "tipo": "Activo",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "1105",
+    "nombre": "Cuentas por cobrar por ventas con trajeta",
     "tipo": "Activo",
     "naturaleza": "Deudora",
     "permiteMovimientos": true,
@@ -97,7 +193,31 @@
   },
   {
     "codigo": "4101",
-    "nombre": "Ventas de Mercancías",
+    "nombre": "Ventas",
+    "tipo": "Ingreso",
+    "naturaleza": "Acreedora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "4102",
+    "nombre": "Descuentos sobre Ventas",
+    "tipo": "Ingreso",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "4103",
+    "nombre": "Devoluciones sobre Ventas",
+    "tipo": "Ingreso",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "4104",
+    "nombre": "Otros Ingresos",
     "tipo": "Ingreso",
     "naturaleza": "Acreedora",
     "permiteMovimientos": true,
@@ -129,7 +249,7 @@
   },
   {
     "codigo": "6101",
-    "nombre": "Gastos de Administración",
+    "nombre": "Empaques",
     "tipo": "Gasto",
     "naturaleza": "Deudora",
     "permiteMovimientos": true,
@@ -137,7 +257,47 @@
   },
   {
     "codigo": "6102",
-    "nombre": "Gastos de Venta",
+    "nombre": "Fletes y Envíos",
+    "tipo": "Gasto",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "6103",
+    "nombre": "Transporte Compras",
+    "tipo": "Gasto",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "6104",
+    "nombre": "Publicidad",
+    "tipo": "Gasto",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "6105",
+    "nombre": "Comisiones Bancarias",
+    "tipo": "Gasto",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "6106",
+    "nombre": "Depreciación",
+    "tipo": "Gasto",
+    "naturaleza": "Deudora",
+    "permiteMovimientos": true,
+    "estaActiva": true
+  },
+  {
+    "codigo": "6107",
+    "nombre": "Papelería y Útiles",
     "tipo": "Gasto",
     "naturaleza": "Deudora",
     "permiteMovimientos": true,
