@@ -2,8 +2,92 @@ using SistemaContable.Dominio;
 
 namespace SistemaContable.Servicios;
 
+public record CrearCuentaDto(
+    string Codigo,
+    string Nombre,
+    string Tipo,
+    string Naturaleza,
+    string? Nivel = "Subcuenta",
+    string? CuentaPadreCodigo = null
+);
+
 public class GestionCuentasService(IRepositorioContable repositorio, ReportesService reportesService)
 {
+    /// <summary>
+    /// Crea y registra una nueva cuenta contable aplicando validaciones de unicidad,
+    /// formato de prefijo por tipo y coherencia contable.
+    /// </summary>
+    public CuentaContable CrearCuenta(CrearCuentaDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Codigo))
+            throw new DominioContableException("El código de la cuenta es obligatorio.");
+
+        if (string.IsNullOrWhiteSpace(dto.Nombre))
+            throw new DominioContableException("El nombre de la cuenta es obligatorio.");
+
+        if (string.IsNullOrWhiteSpace(dto.Tipo))
+            throw new DominioContableException("El tipo de cuenta es obligatorio.");
+
+        if (string.IsNullOrWhiteSpace(dto.Naturaleza))
+            throw new DominioContableException("La naturaleza de la cuenta es obligatoria.");
+
+        var codigoLimpio = dto.Codigo.Trim();
+        var nombreLimpio = dto.Nombre.Trim();
+
+        var cuentas = repositorio.ObtenerCuentas().ToList();
+
+        // 1. Validación de unicidad de código
+        if (cuentas.Any(c => c.Codigo.Equals(codigoLimpio, StringComparison.OrdinalIgnoreCase)))
+            throw new DominioContableException($"El código de cuenta '{codigoLimpio}' ya existe en el catálogo contable.");
+
+        // 2. Validación de unicidad de nombre
+        if (cuentas.Any(c => c.Nombre.Equals(nombreLimpio, StringComparison.OrdinalIgnoreCase)))
+            throw new DominioContableException($"El nombre de cuenta '{nombreLimpio}' ya existe en el catálogo contable.");
+
+        // 3. Parsear Tipo y Naturaleza
+        if (!Enum.TryParse<TipoCuenta>(dto.Tipo, true, out var tipoEnum))
+            throw new DominioContableException($"El tipo de cuenta '{dto.Tipo}' no es válido.");
+
+        if (!Enum.TryParse<NaturalezaSaldo>(dto.Naturaleza, true, out var natEnum))
+            throw new DominioContableException($"La naturaleza '{dto.Naturaleza}' no es válida.");
+
+        // 4. Validación de formato: El código debe coincidir con el prefijo de su tipo
+        // (1 = Activo, 2 = Pasivo, 3 = Capital, 4 = Ingreso, 5 = Costo, 6 = Gasto)
+        char prefijoEsperado = tipoEnum switch
+        {
+            TipoCuenta.Activo => '1',
+            TipoCuenta.Pasivo => '2',
+            TipoCuenta.Capital => '3',
+            TipoCuenta.Ingreso => '4',
+            TipoCuenta.Costo => '5',
+            TipoCuenta.Gasto => '6',
+            _ => '0'
+        };
+
+        var primerDigito = codigoLimpio.FirstOrDefault(char.IsDigit);
+        if (primerDigito != prefijoEsperado)
+        {
+            throw new DominioContableException(
+                $"Inconsistencia de formato: Las cuentas de tipo '{tipoEnum}' deben iniciar con el dígito '{prefijoEsperado}' (1=Activo, 2=Pasivo, 3=Capital, 4=Ingreso, 5=Costo, 6=Gasto). Código ingresado: '{codigoLimpio}'."
+            );
+        }
+
+        // 5. Nivel / Jerarquía (Mayor / Subcuenta)
+        bool esMayor = (dto.Nivel ?? "").Equals("Mayor", StringComparison.OrdinalIgnoreCase);
+        bool permiteMovimientos = !esMayor; // Subcuentas son transaccionales/operativas
+
+        // 6. Cuenta Padre (opcional)
+        if (!string.IsNullOrWhiteSpace(dto.CuentaPadreCodigo))
+        {
+            var padre = cuentas.FirstOrDefault(c => c.Codigo.Equals(dto.CuentaPadreCodigo.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (padre == null)
+                throw new DominioContableException($"La cuenta padre '{dto.CuentaPadreCodigo}' no existe en el catálogo.");
+        }
+
+        var nuevaCuenta = new CuentaContable(codigoLimpio, nombreLimpio, tipoEnum, natEnum, permiteMovimientos, true);
+        repositorio.AgregarCuenta(nuevaCuenta);
+        return nuevaCuenta;
+    }
     /// <summary>
     /// Alterna el estado de activación de una cuenta contable aplicando validaciones de integridad de negocio.
     /// </summary>

@@ -251,6 +251,27 @@ public class SqliteRepositorioContable : IRepositorioContable
         cmd.ExecuteNonQuery();
     }
 
+    public void AgregarCuenta(CuentaContable cuenta)
+    {
+        if (cuenta == null)
+            throw new ArgumentNullException(nameof(cuenta));
+
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            INSERT INTO Cuentas (Codigo, Nombre, Tipo, Naturaleza, PermiteMovimientos, EstaActiva)
+            VALUES (@cod, @nom, @tipo, @nat, @permite, @activa);";
+        cmd.Parameters.AddWithValue("@cod", cuenta.Codigo);
+        cmd.Parameters.AddWithValue("@nom", cuenta.Nombre);
+        cmd.Parameters.AddWithValue("@tipo", (int)cuenta.Tipo);
+        cmd.Parameters.AddWithValue("@nat", (int)cuenta.Naturaleza);
+        cmd.Parameters.AddWithValue("@permite", cuenta.PermiteMovimientos ? 1 : 0);
+        cmd.Parameters.AddWithValue("@activa", cuenta.EstaActiva ? 1 : 0);
+        cmd.ExecuteNonQuery();
+    }
+
     public void GuardarAsiento(AsientoDiario asiento)
     {
         asiento.ValidarYCuadrar();

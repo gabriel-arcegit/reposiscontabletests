@@ -126,4 +126,5 @@ public interface IRepositorioContable
     void GuardarAsiento(AsientoDiario asiento);
     IEnumerable<AsientoDiario> ObtenerAsientos();
     void ActualizarEstadoCuenta(string codigo, bool estaActiva);
+    void AgregarCuenta(CuentaContable cuenta);
 }
