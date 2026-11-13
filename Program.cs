@@ -5,12 +5,21 @@ using SistemaContable.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
-builder.Services.AddSingleton<IRepositorioContable, SqliteRepositorioContable>();
+builder.Services.AddSingleton<IRepositorioContable>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var connStr = config.GetConnectionString("DefaultConnection") ?? "Data Source=contabilidad.db";
+    var userInicial = config["SeguridadInicial:Username"];
+    var passInicial = config["SeguridadInicial:Password"];
+    return new SqliteRepositorioContable(connStr, userInicial, passInicial);
+});
 builder.Services.AddTransient<ReportesService>();
 builder.Services.AddTransient<GestionCuentasService>();
 builder.Services.AddTransient<ContabilidadServicios>();
@@ -178,6 +187,11 @@ app.MapGet("/api/auth/pregunta/{username}", (string username, IRepositorioContab
         return Results.NotFound(new { error = "Usuario no encontrado." });
     }
 
+    if (string.IsNullOrWhiteSpace(usuario.PreguntaSeguridad))
+    {
+        return Results.BadRequest(new { error = "El usuario no tiene configurada una pregunta de seguridad. Debe iniciar sesión y configurarla en Seguridad / Clave." });
+    }
+
     return Results.Ok(new
     {
         username = usuario.Username,
@@ -196,6 +210,11 @@ app.MapPost("/api/auth/recuperar-password", (RecuperarPasswordRequest req, IRepo
     if (usuario == null)
     {
         return Results.NotFound(new { error = "Usuario no encontrado." });
+    }
+
+    if (string.IsNullOrWhiteSpace(usuario.RespuestaHash) || string.IsNullOrWhiteSpace(usuario.RespuestaSalt))
+    {
+        return Results.BadRequest(new { error = "El usuario no tiene una respuesta de seguridad configurada. Por favor inicie sesión o contacte a un administrador." });
     }
 
     var respNorm = SeguridadServicio.NormalizarRespuesta(req.RespuestaSeguridad);

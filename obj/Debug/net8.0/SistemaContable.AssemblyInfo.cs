@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SistemaContable")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5a8474a186f32def729769f7286b1fd014cd9079")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aa518c5ffb0a5a4b884bd07dd8c677355cd21e9e")]
 [assembly: System.Reflection.AssemblyProductAttribute("SistemaContable")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SistemaContable")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

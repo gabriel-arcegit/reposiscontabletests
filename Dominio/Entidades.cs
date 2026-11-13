@@ -127,9 +127,9 @@ public class UsuarioSistema
     public string PasswordHash { get; set; } = string.Empty;
     public string Salt { get; set; } = string.Empty;
     public string Rol { get; set; } = "Admin";
-    public string PreguntaSeguridad { get; set; } = string.Empty;
-    public string RespuestaHash { get; set; } = string.Empty;
-    public string RespuestaSalt { get; set; } = string.Empty;
+    public string? PreguntaSeguridad { get; set; }
+    public string? RespuestaHash { get; set; }
+    public string? RespuestaSalt { get; set; }
     public string? TokenSesion { get; set; }
     public DateTime? ExpiracionSesion { get; set; }
 }

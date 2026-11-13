@@ -8,6 +8,8 @@ namespace SistemaContable.AccesoDatos;
 public class SqliteRepositorioContable : IRepositorioContable
 {
     private readonly string _connectionString;
+    private readonly string _usuarioInicial;
+    private readonly string _passwordInicial;
 
     private record CuentaSeedDto(
         [property: JsonPropertyName("codigo")] string? Codigo,
@@ -18,9 +20,11 @@ public class SqliteRepositorioContable : IRepositorioContable
         [property: JsonPropertyName("estaActiva")] bool EstaActiva = false
     );
 
-    public SqliteRepositorioContable(string connectionString = "Data Source=contabilidad.db")
+    public SqliteRepositorioContable(string connectionString = "Data Source=contabilidad.db", string? usuarioInicial = null, string? passwordInicial = null)
     {
         _connectionString = connectionString;
+        _usuarioInicial = !string.IsNullOrWhiteSpace(usuarioInicial) ? usuarioInicial.Trim() : "admin";
+        _passwordInicial = !string.IsNullOrWhiteSpace(passwordInicial) ? passwordInicial.Trim() : "Cambiar123*";
         InicializarBD();
     }
 
@@ -64,9 +68,9 @@ public class SqliteRepositorioContable : IRepositorioContable
                     PasswordHash TEXT NOT NULL,
                     Salt TEXT NOT NULL,
                     Rol TEXT NOT NULL DEFAULT 'Admin',
-                    PreguntaSeguridad TEXT NOT NULL,
-                    RespuestaHash TEXT NOT NULL,
-                    RespuestaSalt TEXT NOT NULL,
+                    PreguntaSeguridad TEXT NULL,
+                    RespuestaHash TEXT NULL,
+                    RespuestaSalt TEXT NULL,
                     TokenSesion TEXT NULL,
                     ExpiracionSesion TEXT NULL
                 );";
@@ -80,22 +84,20 @@ public class SqliteRepositorioContable : IRepositorioContable
             var userCount = Convert.ToInt32(checkUserCmd.ExecuteScalar());
             if (userCount == 0)
             {
-                var (passHash, passSalt) = SistemaContable.Servicios.SeguridadServicio.CrearHashConSalt("Metro2026*");
-                var respNormalizada = SistemaContable.Servicios.SeguridadServicio.NormalizarRespuesta("metro repuestos");
-                var (respHash, respSalt) = SistemaContable.Servicios.SeguridadServicio.CrearHashConSalt(respNormalizada);
+                var (passHash, passSalt) = SistemaContable.Servicios.SeguridadServicio.CrearHashConSalt(_passwordInicial);
 
                 using var insertUserCmd = connection.CreateCommand();
                 insertUserCmd.CommandText = @"
                     INSERT INTO Usuarios (NombreCompleto, Username, PasswordHash, Salt, Rol, PreguntaSeguridad, RespuestaHash, RespuestaSalt)
                     VALUES ($nombre, $username, $pHash, $pSalt, $rol, $pregunta, $rHash, $rSalt);";
                 insertUserCmd.Parameters.AddWithValue("$nombre", "Administrador Metro Repuestos");
-                insertUserCmd.Parameters.AddWithValue("$username", "admin");
+                insertUserCmd.Parameters.AddWithValue("$username", _usuarioInicial);
                 insertUserCmd.Parameters.AddWithValue("$pHash", passHash);
                 insertUserCmd.Parameters.AddWithValue("$pSalt", passSalt);
                 insertUserCmd.Parameters.AddWithValue("$rol", "Admin");
-                insertUserCmd.Parameters.AddWithValue("$pregunta", "¿Nombre del negocio?");
-                insertUserCmd.Parameters.AddWithValue("$rHash", respHash);
-                insertUserCmd.Parameters.AddWithValue("$rSalt", respSalt);
+                insertUserCmd.Parameters.AddWithValue("$pregunta", DBNull.Value);
+                insertUserCmd.Parameters.AddWithValue("$rHash", DBNull.Value);
+                insertUserCmd.Parameters.AddWithValue("$rSalt", DBNull.Value);
                 insertUserCmd.ExecuteNonQuery();
             }
         }
@@ -442,9 +444,9 @@ public class SqliteRepositorioContable : IRepositorioContable
                 PasswordHash = reader.GetString(3),
                 Salt = reader.GetString(4),
                 Rol = reader.GetString(5),
-                PreguntaSeguridad = reader.GetString(6),
-                RespuestaHash = reader.GetString(7),
-                RespuestaSalt = reader.GetString(8),
+                PreguntaSeguridad = reader.IsDBNull(6) ? null : reader.GetString(6),
+                RespuestaHash = reader.IsDBNull(7) ? null : reader.GetString(7),
+                RespuestaSalt = reader.IsDBNull(8) ? null : reader.GetString(8),
                 TokenSesion = reader.IsDBNull(9) ? null : reader.GetString(9),
                 ExpiracionSesion = reader.IsDBNull(10) ? null : DateTime.Parse(reader.GetString(10))
             };
@@ -489,9 +491,9 @@ public class SqliteRepositorioContable : IRepositorioContable
                 PasswordHash = reader.GetString(3),
                 Salt = reader.GetString(4),
                 Rol = reader.GetString(5),
-                PreguntaSeguridad = reader.GetString(6),
-                RespuestaHash = reader.GetString(7),
-                RespuestaSalt = reader.GetString(8),
+                PreguntaSeguridad = reader.IsDBNull(6) ? null : reader.GetString(6),
+                RespuestaHash = reader.IsDBNull(7) ? null : reader.GetString(7),
+                RespuestaSalt = reader.IsDBNull(8) ? null : reader.GetString(8),
                 TokenSesion = reader.IsDBNull(9) ? null : reader.GetString(9),
                 ExpiracionSesion = expiracion
             };
