@@ -15,7 +15,7 @@ public class SqliteRepositorioContable : IRepositorioContable
         [property: JsonPropertyName("tipo")] string? Tipo,
         [property: JsonPropertyName("naturaleza")] string? Naturaleza,
         [property: JsonPropertyName("permiteMovimientos")] bool PermiteMovimientos = true,
-        [property: JsonPropertyName("estaActiva")] bool EstaActiva = true
+        [property: JsonPropertyName("estaActiva")] bool EstaActiva = false
     );
 
     public SqliteRepositorioContable(string connectionString = "Data Source=contabilidad.db")
@@ -38,7 +38,7 @@ public class SqliteRepositorioContable : IRepositorioContable
                     Tipo INTEGER NOT NULL,
                     Naturaleza INTEGER NOT NULL,
                     PermiteMovimientos INTEGER NOT NULL DEFAULT 1,
-                    EstaActiva INTEGER NOT NULL DEFAULT 1
+                    EstaActiva INTEGER NOT NULL DEFAULT 0
                 );
 
                 CREATE TABLE IF NOT EXISTS Asientos (
@@ -55,8 +55,49 @@ public class SqliteRepositorioContable : IRepositorioContable
                     Debe REAL NOT NULL,
                     Haber REAL NOT NULL,
                     FOREIGN KEY (AsientoId) REFERENCES Asientos(Id) ON DELETE CASCADE
+                );
+
+                CREATE TABLE IF NOT EXISTS Usuarios (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    NombreCompleto TEXT NOT NULL,
+                    Username TEXT NOT NULL UNIQUE,
+                    PasswordHash TEXT NOT NULL,
+                    Salt TEXT NOT NULL,
+                    Rol TEXT NOT NULL DEFAULT 'Admin',
+                    PreguntaSeguridad TEXT NOT NULL,
+                    RespuestaHash TEXT NOT NULL,
+                    RespuestaSalt TEXT NOT NULL,
+                    TokenSesion TEXT NULL,
+                    ExpiracionSesion TEXT NULL
                 );";
             cmd.ExecuteNonQuery();
+        }
+
+        // Seeder inicial de usuario si la tabla Usuarios está vacía
+        using (var checkUserCmd = connection.CreateCommand())
+        {
+            checkUserCmd.CommandText = "SELECT COUNT(*) FROM Usuarios;";
+            var userCount = Convert.ToInt32(checkUserCmd.ExecuteScalar());
+            if (userCount == 0)
+            {
+                var (passHash, passSalt) = SistemaContable.Servicios.SeguridadServicio.CrearHashConSalt("Metro2026*");
+                var respNormalizada = SistemaContable.Servicios.SeguridadServicio.NormalizarRespuesta("metro repuestos");
+                var (respHash, respSalt) = SistemaContable.Servicios.SeguridadServicio.CrearHashConSalt(respNormalizada);
+
+                using var insertUserCmd = connection.CreateCommand();
+                insertUserCmd.CommandText = @"
+                    INSERT INTO Usuarios (NombreCompleto, Username, PasswordHash, Salt, Rol, PreguntaSeguridad, RespuestaHash, RespuestaSalt)
+                    VALUES ($nombre, $username, $pHash, $pSalt, $rol, $pregunta, $rHash, $rSalt);";
+                insertUserCmd.Parameters.AddWithValue("$nombre", "Administrador Metro Repuestos");
+                insertUserCmd.Parameters.AddWithValue("$username", "admin");
+                insertUserCmd.Parameters.AddWithValue("$pHash", passHash);
+                insertUserCmd.Parameters.AddWithValue("$pSalt", passSalt);
+                insertUserCmd.Parameters.AddWithValue("$rol", "Admin");
+                insertUserCmd.Parameters.AddWithValue("$pregunta", "¿Nombre del negocio?");
+                insertUserCmd.Parameters.AddWithValue("$rHash", respHash);
+                insertUserCmd.Parameters.AddWithValue("$rSalt", respSalt);
+                insertUserCmd.ExecuteNonQuery();
+            }
         }
 
         // Migración preventiva: si la tabla Cuentas existía previamente, asegurar la columna EstaActiva
@@ -272,6 +313,20 @@ public class SqliteRepositorioContable : IRepositorioContable
         cmd.ExecuteNonQuery();
     }
 
+    public void EliminarCuenta(string codigo)
+    {
+        if (string.IsNullOrWhiteSpace(codigo))
+            throw new ArgumentException("El código de la cuenta no puede estar vacío.", nameof(codigo));
+
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = "DELETE FROM Cuentas WHERE Codigo = @codigo;";
+        cmd.Parameters.AddWithValue("@codigo", codigo.Trim());
+        cmd.ExecuteNonQuery();
+    }
+
     public void GuardarAsiento(AsientoDiario asiento)
     {
         asiento.ValidarYCuadrar();
@@ -360,5 +415,137 @@ public class SqliteRepositorioContable : IRepositorioContable
         }
 
         return asientos;
+    }
+
+    public UsuarioSistema? ObtenerUsuarioPorUsername(string username)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            SELECT Id, NombreCompleto, Username, PasswordHash, Salt, Rol, 
+                   PreguntaSeguridad, RespuestaHash, RespuestaSalt, TokenSesion, ExpiracionSesion
+            FROM Usuarios 
+            WHERE LOWER(Username) = LOWER($username)
+            LIMIT 1;";
+        cmd.Parameters.AddWithValue("$username", username.Trim());
+
+        using var reader = cmd.ExecuteReader();
+        if (reader.Read())
+        {
+            return new UsuarioSistema
+            {
+                Id = reader.GetInt32(0),
+                NombreCompleto = reader.GetString(1),
+                Username = reader.GetString(2),
+                PasswordHash = reader.GetString(3),
+                Salt = reader.GetString(4),
+                Rol = reader.GetString(5),
+                PreguntaSeguridad = reader.GetString(6),
+                RespuestaHash = reader.GetString(7),
+                RespuestaSalt = reader.GetString(8),
+                TokenSesion = reader.IsDBNull(9) ? null : reader.GetString(9),
+                ExpiracionSesion = reader.IsDBNull(10) ? null : DateTime.Parse(reader.GetString(10))
+            };
+        }
+
+        return null;
+    }
+
+    public UsuarioSistema? ObtenerUsuarioPorToken(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return null;
+
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            SELECT Id, NombreCompleto, Username, PasswordHash, Salt, Rol, 
+                   PreguntaSeguridad, RespuestaHash, RespuestaSalt, TokenSesion, ExpiracionSesion
+            FROM Usuarios 
+            WHERE TokenSesion = $token
+            LIMIT 1;";
+        cmd.Parameters.AddWithValue("$token", token.Trim());
+
+        using var reader = cmd.ExecuteReader();
+        if (reader.Read())
+        {
+            var expStr = reader.IsDBNull(10) ? null : reader.GetString(10);
+            DateTime? expiracion = expStr != null ? DateTime.Parse(expStr) : null;
+
+            // Si ha expirado, no es válido
+            if (expiracion.HasValue && expiracion.Value < DateTime.UtcNow)
+            {
+                return null;
+            }
+
+            return new UsuarioSistema
+            {
+                Id = reader.GetInt32(0),
+                NombreCompleto = reader.GetString(1),
+                Username = reader.GetString(2),
+                PasswordHash = reader.GetString(3),
+                Salt = reader.GetString(4),
+                Rol = reader.GetString(5),
+                PreguntaSeguridad = reader.GetString(6),
+                RespuestaHash = reader.GetString(7),
+                RespuestaSalt = reader.GetString(8),
+                TokenSesion = reader.IsDBNull(9) ? null : reader.GetString(9),
+                ExpiracionSesion = expiracion
+            };
+        }
+
+        return null;
+    }
+
+    public void ActualizarTokenSesion(int usuarioId, string? token, DateTime? expiracion)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            UPDATE Usuarios 
+            SET TokenSesion = $token, ExpiracionSesion = $expiracion
+            WHERE Id = $id;";
+        cmd.Parameters.AddWithValue("$token", (object?)token ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$expiracion", expiracion.HasValue ? expiracion.Value.ToString("o") : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("$id", usuarioId);
+
+        cmd.ExecuteNonQuery();
+    }
+
+    public void ActualizarPassword(int usuarioId, string passwordHash, string salt, string? pregunta = null, string? respuestaHash = null, string? respuestaSalt = null)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        using var cmd = connection.CreateCommand();
+        if (!string.IsNullOrWhiteSpace(pregunta) && !string.IsNullOrWhiteSpace(respuestaHash) && !string.IsNullOrWhiteSpace(respuestaSalt))
+        {
+            cmd.CommandText = @"
+                UPDATE Usuarios 
+                SET PasswordHash = $pHash, Salt = $salt,
+                    PreguntaSeguridad = $pregunta, RespuestaHash = $rHash, RespuestaSalt = $rSalt
+                WHERE Id = $id;";
+            cmd.Parameters.AddWithValue("$pregunta", pregunta);
+            cmd.Parameters.AddWithValue("$rHash", respuestaHash);
+            cmd.Parameters.AddWithValue("$rSalt", respuestaSalt);
+        }
+        else
+        {
+            cmd.CommandText = @"
+                UPDATE Usuarios 
+                SET PasswordHash = $pHash, Salt = $salt
+                WHERE Id = $id;";
+        }
+
+        cmd.Parameters.AddWithValue("$pHash", passwordHash);
+        cmd.Parameters.AddWithValue("$salt", salt);
+        cmd.Parameters.AddWithValue("$id", usuarioId);
+
+        cmd.ExecuteNonQuery();
     }
 }

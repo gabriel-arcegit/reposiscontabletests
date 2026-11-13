@@ -23,44 +23,69 @@ public record EstadoResultadosReporte(
 
 public static class PeriodoHelper
 {
-    public static (DateTime? Desde, DateTime? Hasta, string Descripcion) ResolverRango(string? tipoPeriodo, DateTime? fechaReferencia)
+    public static (DateTime? Desde, DateTime? Hasta, string Descripcion) ResolverRango(
+        string? tipoPeriodo,
+        DateTime? fechaReferencia,
+        DateTime? fechaInicio = null,
+        DateTime? fechaFin = null)
     {
         var refDate = fechaReferencia ?? DateTime.Today;
         var tipo = (tipoPeriodo ?? "todo").Trim().ToLowerInvariant();
 
         switch (tipo)
         {
+            case "personalizado":
+                {
+                    var inicio = fechaInicio.HasValue
+                        ? new DateTime(fechaInicio.Value.Year, fechaInicio.Value.Month, fechaInicio.Value.Day, 0, 0, 0, DateTimeKind.Local)
+                        : (DateTime?)null;
+
+                    var finRef = fechaFin ?? fechaReferencia ?? DateTime.Today;
+                    var fin = new DateTime(finRef.Year, finRef.Month, finRef.Day, 23, 59, 59, 999, DateTimeKind.Local);
+
+                    string desc;
+                    if (inicio.HasValue)
+                    {
+                        desc = $"Del {inicio.Value:dd/MM/yyyy} al {fin:dd/MM/yyyy}";
+                    }
+                    else
+                    {
+                        desc = $"Corte al {fin:dd/MM/yyyy}";
+                    }
+
+                    return (inicio, fin, desc);
+                }
             case "mes":
-            {
-                var inicio = new DateTime(refDate.Year, refDate.Month, 1, 0, 0, 0, DateTimeKind.Local);
-                var fin = inicio.AddMonths(1).AddTicks(-1);
-                var desc = $"{inicio:MMMM yyyy}".ToUpperInvariant();
-                return (inicio, fin, desc);
-            }
+                {
+                    var inicio = new DateTime(refDate.Year, refDate.Month, 1, 0, 0, 0, DateTimeKind.Local);
+                    var fin = inicio.AddMonths(1).AddTicks(-1);
+                    var desc = $"{inicio:MMMM yyyy}".ToUpperInvariant();
+                    return (inicio, fin, desc);
+                }
             case "semestre":
-            {
-                int startMonth = refDate.Month <= 6 ? 1 : 7;
-                var inicio = new DateTime(refDate.Year, startMonth, 1, 0, 0, 0, DateTimeKind.Local);
-                var fin = startMonth == 1
-                    ? new DateTime(refDate.Year, 6, 30, 23, 59, 59, 999, DateTimeKind.Local)
-                    : new DateTime(refDate.Year, 12, 31, 23, 59, 59, 999, DateTimeKind.Local);
-                var semStr = startMonth == 1 ? "1er Semestre" : "2do Semestre";
-                var desc = $"{semStr} {refDate.Year} ({inicio:dd/MM} al {fin:dd/MM/yyyy})";
-                return (inicio, fin, desc);
-            }
+                {
+                    int startMonth = refDate.Month <= 6 ? 1 : 7;
+                    var inicio = new DateTime(refDate.Year, startMonth, 1, 0, 0, 0, DateTimeKind.Local);
+                    var fin = startMonth == 1
+                        ? new DateTime(refDate.Year, 6, 30, 23, 59, 59, 999, DateTimeKind.Local)
+                        : new DateTime(refDate.Year, 12, 31, 23, 59, 59, 999, DateTimeKind.Local);
+                    var semStr = startMonth == 1 ? "1er Semestre" : "2do Semestre";
+                    var desc = $"{semStr} {refDate.Year} ({inicio:dd/MM} al {fin:dd/MM/yyyy})";
+                    return (inicio, fin, desc);
+                }
             case "anio":
             case "año":
-            {
-                var inicio = new DateTime(refDate.Year, 1, 1, 0, 0, 0, DateTimeKind.Local);
-                var fin = new DateTime(refDate.Year, 12, 31, 23, 59, 59, 999, DateTimeKind.Local);
-                var desc = $"Año {refDate.Year}";
-                return (inicio, fin, desc);
-            }
+                {
+                    var inicio = new DateTime(refDate.Year, 1, 1, 0, 0, 0, DateTimeKind.Local);
+                    var fin = new DateTime(refDate.Year, 12, 31, 23, 59, 59, 999, DateTimeKind.Local);
+                    var desc = $"Año {refDate.Year}";
+                    return (inicio, fin, desc);
+                }
             case "todo":
             default:
-            {
-                return (null, null, "Histórico Completo");
-            }
+                {
+                    return (null, null, "Histórico Completo");
+                }
         }
     }
 }

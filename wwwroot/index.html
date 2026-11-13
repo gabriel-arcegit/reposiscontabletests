@@ -10,14 +10,6 @@
     <!-- Bootstrap Icons CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-    <!-- SheetJS (xlsx.full.min.js) para Exportación a Excel con Fórmulas Vivas -->
-    <script src="xlsx.full.min.js"></script>
-    <script>
-        if (typeof XLSX === 'undefined') {
-            document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>');
-        }
-    </script>
-
     <style>
         :root {
             --bs-primary-rgb: 37, 99, 235;
@@ -29,6 +21,122 @@
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             color: #1e293b;
             min-height: 100vh;
+        }
+
+        /* Tipografía y bordes formales contables */
+        .font-numeric {
+            font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .hoja-contable {
+            background-color: #ffffff;
+        }
+
+        .linea-subtotal {
+            border-top: 1px solid #1e293b !important;
+            font-weight: 600;
+        }
+
+        .linea-total-doble {
+            border-top: 1px solid #1e293b !important;
+            border-bottom: 3px double #1e293b !important;
+            font-weight: 700;
+        }
+
+        /* Estilos de Impresión Profesional (PDF Limpio) */
+        @media print {
+            #login-container,
+            nav.navbar,
+            #mainTabs,
+            .bg-light.p-3,
+            .btn,
+            .nav-pills,
+            .alert-dismissible,
+            #btn-refrescar-estados,
+            #btn-imprimir-estados,
+            .modal,
+            .toast-container {
+                display: none !important;
+            }
+
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                font-size: 11pt !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            #app-container {
+                display: block !important;
+                padding: 0 !important;
+            }
+
+            .container-fluid {
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .tab-content > .tab-pane {
+                display: none !important;
+            }
+
+            /* Mostrar únicamente la pestaña activa o la sub-pestaña activa */
+            .tab-pane.active {
+                display: block !important;
+            }
+
+            #tab-estados.active {
+                display: block !important;
+            }
+
+            #estadosFinancierosContent > .tab-pane.active {
+                display: block !important;
+            }
+
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            .card-header, .card-footer {
+                display: none !important;
+            }
+
+            .card-body {
+                padding: 0 !important;
+            }
+
+            .hoja-contable {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+
+            .table {
+                color: #000000 !important;
+                border-color: #333333 !important;
+            }
+
+            .table th, .table td {
+                background-color: transparent !important;
+                color: #000000 !important;
+            }
+
+            .linea-subtotal {
+                border-top: 1px solid #000000 !important;
+            }
+
+            .linea-total-doble {
+                border-top: 1px solid #000000 !important;
+                border-bottom: 3px double #000000 !important;
+            }
+
+            @page {
+                margin: 1.5cm;
+                size: letter portrait;
+            }
         }
 
         /* Pantalla de Login */
@@ -304,7 +412,7 @@
                 <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 64px; height: 64px;">
                     <i class="bi bi-shield-lock-fill fs-2"></i>
                 </div>
-                <h4 class="fw-bold mb-1 text-dark">Aplicación Web</h4>
+                <h4 class="fw-bold mb-1 text-dark">METRO REPUESTOS</h4>
                 <p class="text-muted small">Sistema de Contabilidad Integral</p>
             </div>
 
@@ -315,28 +423,34 @@
 
             <form id="form-login" novalidate>
                 <div class="mb-3">
-                    <label for="login-usuario" class="form-label fw-semibold small text-muted">Usuario</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="login-usuario" class="form-label fw-semibold small text-muted mb-0">Usuario</label>
+                        <a href="javascript:void(0)" id="enlace-otra-cuenta" class="small text-decoration-none d-none" onclick="usarOtraCuenta()">Usar otra cuenta</a>
+                    </div>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-person-fill text-muted"></i></span>
-                        <input type="text" class="form-control" id="login-usuario" placeholder="admin" required autocomplete="username" value="admin">
+                        <input type="text" class="form-control" id="login-usuario" placeholder="Ingrese su usuario" required autocomplete="username">
                     </div>
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-3">
                     <label for="login-password" class="form-label fw-semibold small text-muted">Contraseña</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-key-fill text-muted"></i></span>
-                        <input type="password" class="form-control" id="login-password" placeholder="••••••••" required autocomplete="current-password" value="1234">
-                    </div>
-                    <div class="form-text text-muted" style="font-size: 0.75rem;">
-                        Credenciales de prueba: <strong>admin</strong> / <strong>1234</strong>
+                        <input type="password" class="form-control" id="login-password" placeholder="••••••••" required autocomplete="current-password">
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" id="btn-login">
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 mb-3" id="btn-login">
                     <span>Ingresar al Sistema</span>
                     <i class="bi bi-arrow-right"></i>
                 </button>
+
+                <div class="text-center">
+                    <a href="javascript:void(0)" class="small text-decoration-none fw-semibold text-primary" onclick="abrirModalRecuperarAcceso()">
+                        <i class="bi bi-question-circle me-1"></i>¿Olvidaste tu contraseña?
+                    </a>
+                </div>
             </form>
         </div>
     </div>
@@ -353,17 +467,16 @@
                     <span>Sistema Contable Web</span>
                 </a>
                 <div class="d-flex align-items-center gap-2">
-                    <button class="btn btn-success btn-sm d-flex align-items-center gap-1 shadow-sm" id="btn-exportar-excel" title="Exportar Todo a Excel (.xlsx)">
-                        <i class="bi bi-file-earmark-excel-fill"></i>
-                        <span class="d-none d-sm-inline">Exportar Todo a Excel (.xlsx)</span>
-                    </button>
                     <button class="btn btn-outline-light btn-sm d-flex align-items-center justify-content-center" id="btn-fullscreen" onclick="alternarPantallaCompleta()" title="Pantalla completa" style="width: 36px; height: 31px;">
                         <i class="bi bi-fullscreen" id="icono-fullscreen"></i>
                     </button>
                     <div class="d-none d-md-flex align-items-center text-light small gap-2 ms-2 me-1">
                         <span class="text-muted">Usuario:</span>
-                        <span class="badge bg-secondary"><i class="bi bi-person-circle me-1"></i>Administrador</span>
+                        <span class="badge bg-secondary" id="nav-usuario-badge"><i class="bi bi-person-circle me-1"></i><span id="nav-usuario-nombre">Administrador</span></span>
                     </div>
+                    <button class="btn btn-outline-warning btn-sm" id="btn-seguridad-clave" onclick="abrirModalSeguridad()" title="Seguridad y Clave">
+                        <i class="bi bi-shield-lock me-1"></i> Seguridad / Clave
+                    </button>
                     <button class="btn btn-outline-light btn-sm" id="btn-cerrar-sesion" title="Cerrar sesión">
                         <i class="bi bi-box-arrow-right me-1"></i> Salir
                     </button>
@@ -535,9 +648,15 @@
                                 <h5 class="mb-0 fw-bold"><i class="bi bi-journal-text text-primary me-2"></i>Libro Diario Continental / Multicolumna</h5>
                                 <p class="text-muted small mb-0">Estructura formal con desglose cronológico de partidas dobles, folios de mayor y glosa. <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" id="badge-periodo-diario">Período: Histórico Completo</span></p>
                             </div>
-                            <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-asientos">
-                                <i class="bi bi-arrow-repeat me-1"></i> Actualizar Diario
-                            </button>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 shadow-sm" onclick="window.print()" title="Imprimir / Guardar PDF">
+                                    <i class="bi bi-printer-fill"></i>
+                                    <span>Imprimir / Guardar PDF</span>
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-asientos">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Actualizar Diario
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body p-4">
                             <!-- Barra de Filtro de Período y Búsqueda -->
@@ -553,16 +672,28 @@
                                             <option value="personalizado">Personalizado</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-3 col-sm-6">
+                                    <div class="col-md-3 col-sm-6 contenedor-fecha-unica">
                                         <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-event me-1"></i>Fecha / Referencia:</label>
                                         <input type="date" class="form-control form-control-sm input-fecha-global" id="periodo-fecha-diario">
+                                    </div>
+                                    <div class="col-md-4 col-sm-6 d-none contenedor-rango-personalizado">
+                                        <div class="row g-1">
+                                            <div class="col-6">
+                                                <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-range me-1"></i>Fecha Inicio (Desde):</label>
+                                                <input type="date" class="form-control form-control-sm input-fecha-inicio-global" id="periodo-inicio-diario">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-range-fill me-1"></i>Fecha Fin (Hasta):</label>
+                                                <input type="date" class="form-control form-control-sm input-fecha-fin-global" id="periodo-fin-diario">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-md-2 col-sm-12 d-flex align-items-end">
                                         <button class="btn btn-primary btn-sm w-100 fw-semibold btn-filtrar-periodo-global" id="btn-filtrar-periodo-diario">
                                             <i class="bi bi-funnel-fill me-1"></i> Filtrar
                                         </button>
                                     </div>
-                                    <div class="col-md-4 col-sm-12 d-flex align-items-end justify-content-md-end gap-2 mt-2 mt-md-0">
+                                    <div class="col-md-3 col-sm-12 d-flex align-items-end justify-content-md-end gap-2 mt-2 mt-md-0">
                                         <span class="badge bg-white text-dark border px-3 py-2 d-flex align-items-center gap-1 shadow-sm" id="contador-asientos">
                                             <i class="bi bi-journal-check text-primary"></i> Asientos: <strong>0</strong>
                                         </span>
@@ -578,6 +709,13 @@
                                         <input type="text" class="form-control" id="filtro-historial" placeholder="Buscar por número (#1, 2), fecha (YYYY-MM-DD) o cuenta/glosa...">
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- Membrete Contable Formal -->
+                            <div class="hoja-contable bg-white p-3 rounded shadow-sm border mb-3 text-center encabezado-reporte-formal">
+                                <h4 class="fw-bold mb-1 text-uppercase text-dark" style="letter-spacing: 0.5px;">METRO REPUESTOS</h4>
+                                <h5 class="fw-semibold mb-1 text-primary">LIBRO DIARIO CONTINENTAL</h5>
+                                <p class="text-muted mb-0 small" id="diario-subtitulo-periodo">Período: Histórico Completo | Expresado en Córdobas (C$)</p>
                             </div>
 
                             <!-- Tabla Formal Libro Diario (Tabla 23) -->
@@ -654,15 +792,16 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th style="width: 12%;" class="text-center">Código</th>
-                                            <th style="width: 38%;">Nombre de la Cuenta</th>
+                                            <th style="width: 35%;">Nombre de la Cuenta</th>
                                             <th style="width: 15%;" class="text-center">Clasificación / Tipo</th>
                                             <th style="width: 15%;" class="text-center">Naturaleza</th>
-                                            <th style="width: 20%;" class="text-center">Estado (Activa / Inactiva)</th>
+                                            <th style="width: 15%;" class="text-center">Estado (Activa / Inactiva)</th>
+                                            <th style="width: 8%;" class="text-center">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody id="catalogo-tbody">
                                         <tr>
-                                            <td colspan="5" class="text-center py-4 text-muted">
+                                            <td colspan="6" class="text-center py-4 text-muted">
                                                 <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                                                 Cargando catálogo...
                                             </td>
@@ -695,6 +834,10 @@
                             </div>
 
                             <input type="text" class="form-control form-control-sm" id="filtro-mayor" placeholder="Filtrar por código o nombre..." style="max-width: 250px;">
+                            <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 shadow-sm" onclick="window.print()" title="Imprimir / Guardar PDF">
+                                <i class="bi bi-printer-fill"></i>
+                                <span>Imprimir / Guardar PDF</span>
+                            </button>
                             <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-mayor">
                                 <i class="bi bi-arrow-repeat me-1"></i> Actualizar
                             </button>
@@ -714,19 +857,38 @@
                                     <option value="personalizado">Personalizado</option>
                                 </select>
                             </div>
-                            <div class="col-md-3 col-sm-6">
+                            <div class="col-md-3 col-sm-6 contenedor-fecha-unica">
                                 <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-event me-1"></i>Fecha de Corte:</label>
                                 <input type="date" class="form-control form-control-sm input-fecha-global" id="periodo-fecha-mayor">
+                            </div>
+                            <div class="col-md-4 col-sm-6 d-none contenedor-rango-personalizado">
+                                <div class="row g-1">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-range me-1"></i>Fecha Inicio (Desde):</label>
+                                        <input type="date" class="form-control form-control-sm input-fecha-inicio-global" id="periodo-inicio-mayor">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-range-fill me-1"></i>Fecha Fin (Hasta):</label>
+                                        <input type="date" class="form-control form-control-sm input-fecha-fin-global" id="periodo-fin-mayor">
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-2 col-sm-12 d-flex align-items-end">
                                 <button class="btn btn-primary btn-sm w-100 fw-semibold btn-filtrar-periodo-global" id="btn-filtrar-periodo-mayor">
                                     <i class="bi bi-funnel-fill me-1"></i> Filtrar
                                 </button>
                             </div>
-                            <div class="col-md-4 col-sm-12 d-flex align-items-center justify-content-md-end text-muted small">
-                                <i class="bi bi-info-circle me-1 text-primary"></i> Saldos acumulados a la fecha de corte seleccionada.
+                            <div class="col-md-3 col-sm-12 d-flex align-items-center justify-content-md-end text-muted small">
+                                <i class="bi bi-info-circle me-1 text-primary"></i> Saldos a la fecha de corte.
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Membrete Contable Formal -->
+                    <div class="hoja-contable bg-white p-3 rounded shadow-sm border mb-3 text-center encabezado-reporte-formal">
+                        <h4 class="fw-bold mb-1 text-uppercase text-dark" style="letter-spacing: 0.5px;">METRO REPUESTOS</h4>
+                        <h5 class="fw-semibold mb-1 text-primary">LIBRO MAYOR</h5>
+                        <p class="text-muted mb-0 small" id="mayor-subtitulo-periodo">Período: Histórico Completo | Expresado en Córdobas (C$)</p>
                     </div>
 
                     <!-- Vista 1: Estructura Formal Tabular (Tabla 24 del manual) -->
@@ -756,9 +918,15 @@
                                 <h5 class="mb-0 fw-bold"><i class="bi bi-table text-primary me-2"></i>Balanza de Comprobación</h5>
                                 <p class="text-muted small mb-0">Resumen integral de movimientos (Debe/Haber) y saldos finales (Deudor/Acreedor). <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" id="badge-periodo-balanza">Período: Histórico Completo</span></p>
                             </div>
-                            <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-balanza">
-                                <i class="bi bi-arrow-repeat me-1"></i> Actualizar Balanza
-                            </button>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 shadow-sm" onclick="window.print()" title="Imprimir / Guardar PDF">
+                                    <i class="bi bi-printer-fill"></i>
+                                    <span>Imprimir / Guardar PDF</span>
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-balanza">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Actualizar Balanza
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body p-4">
 
@@ -775,16 +943,28 @@
                                             <option value="personalizado">Personalizado</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-3 col-sm-6">
+                                    <div class="col-md-3 col-sm-6 contenedor-fecha-unica">
                                         <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-event me-1"></i>Fecha de Corte:</label>
                                         <input type="date" class="form-control form-control-sm input-fecha-global" id="periodo-fecha-balanza">
+                                    </div>
+                                    <div class="col-md-4 col-sm-6 d-none contenedor-rango-personalizado">
+                                        <div class="row g-1">
+                                            <div class="col-6">
+                                                <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-range me-1"></i>Fecha Inicio (Desde):</label>
+                                                <input type="date" class="form-control form-control-sm input-fecha-inicio-global" id="periodo-inicio-balanza">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-range-fill me-1"></i>Fecha Fin (Hasta):</label>
+                                                <input type="date" class="form-control form-control-sm input-fecha-fin-global" id="periodo-fin-balanza">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-md-2 col-sm-12 d-flex align-items-end">
                                         <button class="btn btn-primary btn-sm w-100 fw-semibold btn-filtrar-periodo-global" id="btn-filtrar-periodo-balanza">
                                             <i class="bi bi-funnel-fill me-1"></i> Filtrar
                                         </button>
                                     </div>
-                                    <div class="col-md-4 col-sm-12 d-flex align-items-center justify-content-md-end text-muted small">
+                                    <div class="col-md-3 col-sm-12 d-flex align-items-center justify-content-md-end text-muted small">
                                         <i class="bi bi-shield-check me-1 text-success"></i> Suma acumulada de movimientos a la fecha de corte.
                                     </div>
                                 </div>
@@ -800,6 +980,13 @@
                                     </div>
                                 </div>
                                 <span class="badge bg-secondary fs-6 px-3 py-2" id="banner-balanza-badge">Verificando...</span>
+                            </div>
+
+                            <!-- Membrete Contable Formal -->
+                            <div class="hoja-contable bg-white p-3 rounded shadow-sm border mb-3 text-center encabezado-reporte-formal">
+                                <h4 class="fw-bold mb-1 text-uppercase text-dark" style="letter-spacing: 0.5px;">METRO REPUESTOS</h4>
+                                <h5 class="fw-semibold mb-1 text-primary">BALANZA DE COMPROBACIÓN</h5>
+                                <p class="text-muted mb-0 small" id="balanza-subtitulo-periodo">Período: Histórico Completo | Expresado en Córdobas (C$)</p>
                             </div>
 
                             <!-- Tabla de 4 columnas de la Balanza de Comprobación -->
@@ -860,16 +1047,28 @@
                                     <option value="personalizado">Personalizado</option>
                                 </select>
                             </div>
-                            <div class="col-md-3 col-sm-6">
+                            <div class="col-md-3 col-sm-6 contenedor-fecha-unica">
                                 <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-event me-1"></i>Fecha de Referencia / Corte:</label>
                                 <input type="date" class="form-control form-control-sm input-fecha-global" id="periodo-fecha-estados">
+                            </div>
+                            <div class="col-md-4 col-sm-6 d-none contenedor-rango-personalizado">
+                                <div class="row g-1">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-range me-1"></i>Fecha Inicio (Desde):</label>
+                                        <input type="date" class="form-control form-control-sm input-fecha-inicio-global" id="periodo-inicio-estados">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold mb-1 text-muted"><i class="bi bi-calendar-range-fill me-1"></i>Fecha Fin (Hasta):</label>
+                                        <input type="date" class="form-control form-control-sm input-fecha-fin-global" id="periodo-fin-estados">
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-2 col-sm-12 d-flex align-items-end">
                                 <button class="btn btn-primary btn-sm w-100 fw-semibold btn-filtrar-periodo-global" id="btn-filtrar-periodo-estados">
                                     <i class="bi bi-funnel-fill me-1"></i> Filtrar / Consultar
                                 </button>
                             </div>
-                            <div class="col-md-4 col-sm-12 d-flex align-items-center justify-content-md-end text-muted small">
+                            <div class="col-md-3 col-sm-12 d-flex align-items-center justify-content-md-end text-muted small">
                                 <span class="badge bg-primary text-white px-3 py-2 fs-6 shadow-sm" id="badge-periodo-estados">
                                     <i class="bi bi-clock-history me-1"></i> Período: Histórico Completo
                                 </span>
@@ -877,7 +1076,7 @@
                         </div>
                     </div>
 
-                    <!-- Sub-pestañas de Estados Financieros -->
+                    <!-- Sub-pestañas de Estados Financieros con Botón Imprimir / Guardar PDF -->
                     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                         <ul class="nav nav-pills gap-2" id="estadosFinancierosPills" role="tablist">
                             <li class="nav-item" role="presentation">
@@ -901,9 +1100,15 @@
                                 </button>
                             </li>
                         </ul>
-                        <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-estados">
-                            <i class="bi bi-arrow-repeat me-1"></i> Actualizar Reportes
-                        </button>
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 shadow-sm" id="btn-imprimir-estados" onclick="window.print()" title="Imprimir / Guardar PDF">
+                                <i class="bi bi-printer-fill"></i>
+                                <span>Imprimir / Guardar PDF</span>
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" id="btn-refrescar-estados">
+                                <i class="bi bi-arrow-repeat me-1"></i> Actualizar Reportes
+                            </button>
+                        </div>
                     </div>
 
                     <div class="tab-content" id="estadosFinancierosContent">
@@ -923,122 +1128,126 @@
                                 </div>
                             </div>
 
-                            <!-- Banner de Ecuación Contable -->
-                            <div id="banner-equilibrio" class="alert alert-secondary d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm" role="alert">
-                                <div class="d-flex align-items-center gap-3">
-                                    <i class="bi bi-hourglass-split fs-3" id="banner-icono"></i>
-                                    <div>
-                                        <h6 class="mb-0 fw-bold" id="banner-titulo">Calculando Ecuación Contable...</h6>
-                                        <small id="banner-descripcion" class="text-muted">Verificando Activo = Pasivo + Capital</small>
-                                    </div>
-                                </div>
-                                <span class="badge bg-secondary fs-6 px-3 py-2" id="banner-badge">Verificando...</span>
+                            <!-- Barra de Herramientas Local de Balance General (Botón desplegable) -->
+                            <div class="d-flex justify-content-end align-items-center mb-3">
+                                <button class="btn btn-primary btn-sm d-flex align-items-center gap-2 shadow-sm fw-semibold" id="btn-toggle-detalle-balance" onclick="alternarDetalleBalance()">
+                                    <i class="bi bi-chevron-down" id="icono-toggle-balance"></i>
+                                    <span id="texto-toggle-balance">Ver más (Detalle por Cuentas)</span>
+                                </button>
                             </div>
 
-                            <!-- KPI Cards Balance -->
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-3">
-                                    <div class="card kpi-card kpi-activo p-3 shadow-sm">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="text-uppercase fw-semibold small opacity-75">Total Activo</span>
-                                            <i class="bi bi-cash-coin fs-4"></i>
+                            <!-- VISTA 1: Resumen Ejecutivo de Balance General (Por Defecto) -->
+                            <div id="balance-vista-resumida" class="hoja-contable bg-white p-4 rounded shadow-sm border mb-4">
+                                <!-- Encabezado formal centrado de 3 líneas -->
+                                <div class="text-center mb-4 pb-2 border-bottom">
+                                    <h4 class="fw-bold mb-1 text-uppercase text-dark" style="letter-spacing: 0.5px;">METRO REPUESTOS</h4>
+                                    <h5 class="fw-semibold mb-1 text-primary">BALANCE GENERAL (RESUMEN EJECUTIVO)</h5>
+                                    <p class="text-muted mb-0 small" id="balance-resumen-subtitulo-periodo">Período: Histórico Completo | Expresado en Córdobas (C$)</p>
+                                </div>
+
+                                <!-- Bloques / Tarjetas Ejecutivas de Totales -->
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <div class="card p-3 border-primary border-start border-4 shadow-sm bg-light">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Total Activo</div>
+                                            <h3 class="fw-bold text-primary font-numeric mb-0" id="resumen-bal-activo">C$ 0.00</h3>
+                                            <div class="small text-muted mt-1" id="resumen-bal-subactivo">Corriente: C$ 0.00 | No Cte: C$ 0.00</div>
                                         </div>
-                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-activo">$0.00</h3>
-                                        <small class="opacity-75 mt-1">Bienes y Derechos</small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card p-3 border-danger border-start border-4 shadow-sm bg-light">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Total Pasivo</div>
+                                            <h3 class="fw-bold text-danger font-numeric mb-0" id="resumen-bal-pasivo">C$ 0.00</h3>
+                                            <div class="small text-muted mt-1" id="resumen-bal-subpasivo">Corriente: C$ 0.00 | No Cte: C$ 0.00</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card p-3 border-purple border-start border-4 shadow-sm bg-light" style="border-color: #6d28d9 !important;">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Total Capital Contable</div>
+                                            <h3 class="fw-bold font-numeric mb-0" style="color: #6d28d9;" id="resumen-bal-capital">C$ 0.00</h3>
+                                            <div class="small text-muted mt-1" id="resumen-bal-subcapital">Social: C$ 0.00 | Ejercicio: C$ 0.00</div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
-                                    <div class="card kpi-card kpi-pasivo p-3 shadow-sm">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="text-uppercase fw-semibold small opacity-75">Total Pasivo</span>
-                                            <i class="bi bi-credit-card-2-front fs-4"></i>
-                                        </div>
-                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-pasivo">$0.00</h3>
-                                        <small class="opacity-75 mt-1">Obligaciones y Deudas</small>
-                                    </div>
+                                <!-- Tabla Sintética de Cierre Ejecutivo -->
+                                <div class="table-responsive mb-4">
+                                    <table class="table table-bordered align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="text-uppercase small">Concepto Patrimonial</th>
+                                                <th class="text-end text-uppercase small" style="width: 35%;">Monto Total (C$)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="fw-semibold text-primary"><i class="bi bi-wallet2 me-2"></i>(=) TOTAL ACTIVO</td>
+                                                <td class="text-end font-numeric fw-bold text-primary fs-6" id="resumen-fila-activo">C$ 0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-semibold text-danger"><i class="bi bi-credit-card-2-front me-2"></i>(+) TOTAL PASIVO</td>
+                                                <td class="text-end font-numeric fw-bold text-danger" id="resumen-fila-pasivo">C$ 0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-semibold" style="color:#6d28d9;"><i class="bi bi-bank me-2"></i>(+) TOTAL CAPITAL CONTABLE</td>
+                                                <td class="text-end font-numeric fw-bold" style="color:#6d28d9;" id="resumen-fila-capital">C$ 0.00</td>
+                                            </tr>
+                                            <tr class="table-light">
+                                                <td class="fw-bold text-success text-uppercase fs-6"><i class="bi bi-check2-all me-2"></i>(=) TOTAL PASIVO + CAPITAL CONTABLE</td>
+                                                <td class="text-end font-numeric fw-bold text-success fs-6 linea-total-doble" id="resumen-fila-pasivo-capital">C$ 0.00</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
 
-                                <div class="col-md-3">
-                                    <div class="card kpi-card kpi-capital p-3 shadow-sm">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="text-uppercase fw-semibold small opacity-75">Total Capital</span>
-                                            <i class="bi bi-bank fs-4"></i>
-                                        </div>
-                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-capital">$0.00</h3>
-                                        <small class="opacity-75 mt-1">Patrimonio Neto Total</small>
+                                <!-- Comprobación de Ecuación Contable Resumida -->
+                                <div class="p-3 bg-light rounded border d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                    <div class="small text-muted font-monospace" id="balance-resumen-ecuacion-texto">
+                                        ACTIVO = PASIVO + CAPITAL CONTABLE
                                     </div>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <div class="card kpi-card kpi-utilidad p-3 shadow-sm" id="card-utilidad">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="text-uppercase fw-semibold small opacity-75" id="kpi-utilidad-titulo">Utilidad Neta</span>
-                                            <i class="bi bi-graph-up-arrow fs-4" id="icono-utilidad"></i>
-                                        </div>
-                                        <h3 class="fw-bold mb-0 font-numeric" id="kpi-utilidad">$0.00</h3>
-                                        <small class="opacity-75 mt-1" id="kpi-utilidad-desc">Ingresos - Costos - Gastos</small>
+                                    <div id="balance-resumen-cuadre-badge">
+                                        <span class="badge bg-secondary px-3 py-2 fs-6">Comprobando...</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Comprobación Matemática -->
-                            <div class="row g-4">
-                                <div class="col-lg-6">
-                                    <div class="card shadow-sm h-100">
-                                        <div class="card-header">
-                                            <i class="bi bi-calculator me-1 text-primary"></i> Comprobación de la Ecuación Contable
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="bg-light p-3 rounded-3 text-center mb-4">
-                                                <div class="fs-5 fw-bold text-dark font-monospace">
-                                                    <span class="text-primary">ACTIVO</span> = <span class="text-warning">PASIVO</span> + <span style="color: #6d28d9;">CAPITAL</span>
-                                                </div>
-                                                <div class="fs-6 text-muted mt-2 font-monospace" id="ecuacion-valores">
-                                                    $0.00 = $0.00 + $0.00
-                                                </div>
-                                            </div>
-                                            <table class="table table-bordered mb-0">
-                                                <tbody>
-                                                    <tr>
-                                                        <th class="w-50">Lado Izquierdo (Activo)</th>
-                                                        <td class="text-end fw-bold text-primary font-monospace font-numeric" id="lado-izq">$0.00</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Lado Derecho (Pasivo + Capital)</th>
-                                                        <td class="text-end fw-bold text-success font-monospace font-numeric" id="lado-der">$0.00</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Diferencia Contable</th>
-                                                        <td class="text-end fw-bold font-monospace font-numeric" id="diferencia-balance">$0.00</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+                            <!-- VISTA 2: Hoja de Trabajo Contable Formal Detallada (Desplegable) -->
+                            <div id="balance-vista-detallada" class="hoja-contable bg-white p-4 rounded shadow-sm border mb-4 d-none">
+                                <!-- Encabezado formal centrado de 3 líneas -->
+                                <div class="text-center mb-4 pb-2 border-bottom">
+                                    <h4 class="fw-bold mb-1 text-uppercase text-dark" style="letter-spacing: 0.5px;">METRO REPUESTOS</h4>
+                                    <h5 class="fw-semibold mb-1 text-primary">BALANCE GENERAL CLASIFICADO (DETALLADO)</h5>
+                                    <p class="text-muted mb-0 small" id="balance-subtitulo-periodo">Período: Histórico Completo | Expresado en Córdobas (C$)</p>
                                 </div>
 
-                                <div class="col-lg-6">
-                                    <div class="card shadow-sm h-100">
-                                        <div class="card-header">
-                                            <i class="bi bi-info-circle me-1 text-info"></i> Integridad Financiera
-                                        </div>
-                                        <div class="card-body">
-                                            <ul class="list-group list-group-flush small">
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <span><i class="bi bi-check2 text-success me-2"></i>Utilidad Neta integrada al Capital:</span>
-                                                    <span class="fw-bold font-numeric" id="resumen-utilidad-capital">$0.00</span>
-                                                </li>
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <span><i class="bi bi-shield-check text-success me-2"></i>Integridad de Partida Doble:</span>
-                                                    <span class="badge bg-success-subtle text-success">Verificada</span>
-                                                </li>
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <span><i class="bi bi-database text-primary me-2"></i>Motor de Base de Datos:</span>
-                                                    <span class="text-muted">SQLite / .NET 8 Web API</span>
-                                                </li>
-                                            </ul>
-                                        </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle mb-0" id="tabla-balance-detallado">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 15%;">Código</th>
+                                                <th style="width: 45%;">Clasificación / Cuentas</th>
+                                                <th style="width: 20%;" class="text-end">Importe Parcial (C$)</th>
+                                                <th style="width: 20%;" class="text-end">Totales de Rubro (C$)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="balance-detallado-tbody">
+                                            <tr>
+                                                <td colspan="4" class="text-center py-4 text-muted">
+                                                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                                    Cargando Balance General Detallado...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Comprobación de Cuadre y Ecuación Contable -->
+                                <div class="mt-4 pt-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                    <div class="small text-muted font-monospace" id="balance-ecuacion-texto">
+                                        ACTIVO = PASIVO + CAPITAL CONTABLE
+                                    </div>
+                                    <div id="balance-cuadre-badge">
+                                        <span class="badge bg-secondary px-3 py-2 fs-6">Comprobando balance...</span>
                                     </div>
                                 </div>
                             </div>
@@ -1048,37 +1257,33 @@
                         <!-- SUB-PESTAÑA 6.2: ESTADO DE RESULTADOS                -->
                         <!-- ---------------------------------------------------- -->
                         <div class="tab-pane fade" id="pill-resultados" role="tabpanel">
-                            <div class="card shadow-sm mb-4">
-                                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 class="mb-0 fw-bold"><i class="bi bi-graph-up text-success me-2"></i>Estado de Resultados Integral</h5>
-                                        <small class="text-muted" id="subtitulo-resultados">Período analítico de ingresos, costos y gastos operativos</small>
-                                    </div>
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6" id="badge-utilidad-neta-head">
-                                        Utilidad Neta: $0.00
-                                    </span>
+                            <div class="hoja-contable bg-white p-4 rounded shadow-sm border mb-4">
+                                <!-- Encabezado formal centrado de 3 líneas -->
+                                <div class="text-center mb-4 pb-2 border-bottom">
+                                    <h4 class="fw-bold mb-1 text-uppercase text-dark" style="letter-spacing: 0.5px;">METRO REPUESTOS</h4>
+                                    <h5 class="fw-semibold mb-1 text-success">ESTADO DE RESULTADOS</h5>
+                                    <p class="text-muted mb-0 small" id="resultados-subtitulo-periodo">Período: Histórico Completo | Expresado en Córdobas (C$)</p>
                                 </div>
-                                <div class="card-body p-4">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-hover align-middle mb-0" id="tabla-estado-resultados">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th style="width: 15%;">Código</th>
-                                                    <th style="width: 45%;">Concepto / Cuentas</th>
-                                                    <th style="width: 20%;" class="text-end">Subtotales</th>
-                                                    <th style="width: 20%;" class="text-end">Totales</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="resultados-tbody">
-                                                <tr>
-                                                    <td colspan="4" class="text-center py-4 text-muted">
-                                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                                                        Cargando Estado de Resultados...
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle mb-0" id="tabla-estado-resultados">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 15%;">Código</th>
+                                                <th style="width: 45%;">Clasificación / Cuentas</th>
+                                                <th style="width: 20%;" class="text-end">Importe Parcial (C$)</th>
+                                                <th style="width: 20%;" class="text-end">Totales de Rubro (C$)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="resultados-tbody">
+                                            <tr>
+                                                <td colspan="4" class="text-center py-4 text-muted">
+                                                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                                    Cargando Estado de Resultados...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -1087,6 +1292,13 @@
                         <!-- SUB-PESTAÑA 6.3: ESTADO DE FLUJO DE EFECTIVO         -->
                         <!-- ---------------------------------------------------- -->
                         <div class="tab-pane fade" id="pill-flujo" role="tabpanel">
+                            <!-- Encabezado formal centrado de 3 líneas -->
+                            <div class="hoja-contable bg-white p-3 rounded shadow-sm border mb-4 text-center">
+                                <h4 class="fw-bold mb-1 text-uppercase text-dark" style="letter-spacing: 0.5px;">METRO REPUESTOS</h4>
+                                <h5 class="fw-semibold mb-1 text-primary">ESTADO DE FLUJO DE EFECTIVO</h5>
+                                <p class="text-muted mb-0 small" id="flujo-subtitulo-periodo">Período: Histórico Completo | Expresado en Córdobas (C$)</p>
+                            </div>
+
                             <!-- Contenedor Alerta Sobregiro de Tesorería -->
                             <div id="alerta-sobregiro-container"></div>
 
@@ -1392,6 +1604,126 @@
         </div>
     </div>
 
+    <!-- Modal de Seguridad y Cambio de Contraseña -->
+    <div class="modal fade" id="modal-seguridad" tabindex="-1" aria-labelledby="modalSeguridadLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white py-3">
+                    <h5 class="modal-title fw-bold" id="modalSeguridadLabel">
+                        <i class="bi bi-shield-lock-fill text-warning me-2"></i>Seguridad y Credenciales
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <form id="form-cambiar-password">
+                    <div class="modal-body p-4">
+                        <div id="alerta-modal-seguridad" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label for="cambio-pass-actual" class="form-label fw-bold small">Contraseña Actual <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="cambio-pass-actual" required placeholder="Ingrese su contraseña actual">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cambio-pass-nueva" class="form-label fw-bold small">Nueva Contraseña <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="cambio-pass-nueva" required minlength="6" placeholder="Mínimo 6 caracteres">
+                            <div class="form-text">Debe contener al menos 6 caracteres.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cambio-pass-confirmar" class="form-label fw-bold small">Confirmar Nueva Contraseña <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="cambio-pass-confirmar" required minlength="6" placeholder="Repita la nueva contraseña">
+                        </div>
+
+                        <hr class="my-3">
+                        <h6 class="fw-bold text-secondary small text-uppercase mb-2"><i class="bi bi-question-shield me-1"></i> Pregunta de Recuperación (Opcional)</h6>
+
+                        <div class="mb-3">
+                            <label for="cambio-pregunta" class="form-label small">Pregunta Secreta</label>
+                            <input type="text" class="form-control" id="cambio-pregunta" placeholder="Ej: ¿Nombre de mi primera mascota?">
+                        </div>
+
+                        <div class="mb-2">
+                            <label for="cambio-respuesta" class="form-label small">Respuesta Secreta</label>
+                            <input type="text" class="form-control" id="cambio-respuesta" placeholder="Respuesta confidencial">
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light py-2">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary fw-semibold" id="btn-guardar-password">
+                            <i class="bi bi-check2-circle me-1"></i> Actualizar Seguridad
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Recuperación de Acceso -->
+    <div class="modal fade" id="modal-recuperar" tabindex="-1" aria-labelledby="modalRecuperarLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white py-3">
+                    <h5 class="modal-title fw-bold" id="modalRecuperarLabel">
+                        <i class="bi bi-key-fill me-2"></i>Recuperar Acceso
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <form id="form-recuperar-password">
+                    <div class="modal-body p-4">
+                        <div id="alerta-modal-recuperar" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
+
+                        <!-- Paso 1: Identificar usuario -->
+                        <div class="mb-3" id="recuperar-paso1">
+                            <label for="recuperar-usuario" class="form-label fw-bold small">Nombre de Usuario <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-person-fill text-muted"></i></span>
+                                <input type="text" class="form-control" id="recuperar-usuario" required placeholder="admin">
+                                <button class="btn btn-outline-primary" type="button" id="btn-consultar-pregunta" onclick="consultarPreguntaSeguridad()">
+                                    <i class="bi bi-search me-1"></i> Continuar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Paso 2: Pregunta y nueva clave (se activa tras encontrar usuario) -->
+                        <div id="recuperar-paso2" class="d-none">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-muted">Pregunta de Seguridad Registrada:</label>
+                                <div class="p-2 bg-light rounded border fw-semibold text-dark small" id="recuperar-texto-pregunta">
+                                    --
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="recuperar-respuesta" class="form-label fw-bold small">Tu Respuesta Secreta <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="recuperar-respuesta" required placeholder="Escribe tu respuesta">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="recuperar-nueva-clave" class="form-label fw-bold small">Nueva Contraseña <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="recuperar-nueva-clave" required minlength="6" placeholder="Mínimo 6 caracteres">
+                            </div>
+
+                            <div class="mb-2">
+                                <label for="recuperar-confirmar-clave" class="form-label fw-bold small">Confirmar Nueva Contraseña <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="recuperar-confirmar-clave" required minlength="6" placeholder="Repite la nueva contraseña">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light py-2">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success fw-semibold d-none" id="btn-confirmar-recuperacion">
+                            <i class="bi bi-check2-circle me-1"></i> Restablecer Contraseña
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast de Notificaciones -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1200;">
         <div id="app-toast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -1409,10 +1741,21 @@
 
     <!-- Lógica de la Aplicación en Vanilla JavaScript -->
     <script>
+        // Configuración Centralizada de Identidad Comercial
+        const EMPRESA_CONFIG = {
+            nombre: "METRO REPUESTOS",
+            subtitulo: "Sistema Contable Integral"
+        };
+
         // Estado Global de Período y Aplicación
+        const fechaHoy = new Date().toISOString().split('T')[0];
+        const fechaInicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+
         window.estadoPeriodoActual = {
             tipo: 'todo',
-            fecha: new Date().toISOString().split('T')[0]
+            fecha: fechaHoy,
+            fechaInicio: fechaInicioMes,
+            fechaFin: fechaHoy
         };
 
         const state = {
@@ -1434,6 +1777,8 @@
             // 1. Intentar leer desde elementos del DOM activos en las barras de período
             const selectores = ['#periodo-tipo-diario', '#periodo-tipo-mayor', '#periodo-tipo-balanza', '#periodo-tipo-estados', '.select-periodo-global'];
             const inputsFecha = ['#periodo-fecha-diario', '#periodo-fecha-mayor', '#periodo-fecha-balanza', '#periodo-fecha-estados', '.input-fecha-global'];
+            const inputsInicio = ['#periodo-inicio-diario', '#periodo-inicio-mayor', '#periodo-inicio-balanza', '#periodo-inicio-estados', '.input-fecha-inicio-global'];
+            const inputsFin = ['#periodo-fin-diario', '#periodo-fin-mayor', '#periodo-fin-balanza', '#periodo-fin-estados', '.input-fecha-fin-global'];
 
             let tipoDetectado = null;
             for (const s of selectores) {
@@ -1453,36 +1798,58 @@
                 }
             }
 
-            // 2. Extraer de atributos data- del botón o estado global
-            const btnExportar = document.getElementById('btn-exportar-excel');
-            const dataTipo = btnExportar?.dataset?.tipoPeriodo;
-            const dataFecha = btnExportar?.dataset?.fechaPeriodo;
+            let inicioDetectado = null;
+            for (const fi of inputsInicio) {
+                const el = document.querySelector(fi);
+                if (el && el.value) {
+                    inicioDetectado = el.value.trim();
+                    break;
+                }
+            }
+
+            let finDetectado = null;
+            for (const ff of inputsFin) {
+                const el = document.querySelector(ff);
+                if (el && el.value) {
+                    finDetectado = el.value.trim();
+                    break;
+                }
+            }
 
             const hoy = new Date().toISOString().split('T')[0];
-            const tipoFinal = tipoDetectado || dataTipo || window.estadoPeriodoActual?.tipo || state.periodo?.tipo || window.periodoSeleccionado || 'todo';
-            const fechaFinal = fechaDetectada || dataFecha || window.estadoPeriodoActual?.fecha || state.periodo?.fecha || hoy;
+            const primerDia = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+
+            const tipoFinal = tipoDetectado || window.estadoPeriodoActual?.tipo || state.periodo?.tipo || 'todo';
+            const fechaFinal = fechaDetectada || window.estadoPeriodoActual?.fecha || state.periodo?.fecha || hoy;
+            const inicioFinal = inicioDetectado || window.estadoPeriodoActual?.fechaInicio || state.periodo?.fechaInicio || primerDia;
+            const finFinal = finDetectado || window.estadoPeriodoActual?.fechaFin || state.periodo?.fechaFin || hoy;
 
             // Mantener sincronía global
             window.estadoPeriodoActual.tipo = tipoFinal;
             window.estadoPeriodoActual.fecha = fechaFinal;
+            window.estadoPeriodoActual.fechaInicio = inicioFinal;
+            window.estadoPeriodoActual.fechaFin = finFinal;
             state.periodo = window.estadoPeriodoActual;
 
-            if (btnExportar) {
-                btnExportar.dataset.tipoPeriodo = tipoFinal;
-                btnExportar.dataset.fechaPeriodo = fechaFinal;
-            }
-
-            return { tipo: tipoFinal, fecha: fechaFinal };
+            return { tipo: tipoFinal, fecha: fechaFinal, fechaInicio: inicioFinal, fechaFin: finFinal };
         }
 
         // Helper para generar query params de periodo
         function obtenerQueryPeriodo() {
             const p = obtenerPeriodoActivo();
-            return `?tipoPeriodo=${encodeURIComponent(p.tipo || 'todo')}&fechaReferencia=${encodeURIComponent(p.fecha || '')}`;
+            let query = `?tipoPeriodo=${encodeURIComponent(p.tipo || 'todo')}`;
+            if (p.tipo === 'personalizado') {
+                if (p.fechaInicio) query += `&fechaInicio=${encodeURIComponent(p.fechaInicio)}`;
+                if (p.fechaFin) query += `&fechaFin=${encodeURIComponent(p.fechaFin)}`;
+                query += `&fechaReferencia=${encodeURIComponent(p.fechaFin || p.fecha || '')}`;
+            } else {
+                query += `&fechaReferencia=${encodeURIComponent(p.fecha || '')}`;
+            }
+            return query;
         }
 
         // Obtener descripción legible del periodo actual
-        function obtenerDescripcionPeriodo(tipo, fechaStr) {
+        function obtenerDescripcionPeriodo(tipo, fechaStr, fechaInicioStr, fechaFinStr) {
             const fecha = fechaStr ? new Date(fechaStr + 'T12:00:00') : new Date();
             const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
             switch (tipo) {
@@ -1493,7 +1860,14 @@
                 case 'anio':
                     return `Año: ${fecha.getFullYear()}`;
                 case 'personalizado':
-                    return `Corte al: ${fechaStr}`;
+                    if (fechaInicioStr && fechaFinStr) {
+                        const partesI = fechaInicioStr.split('-');
+                        const partesF = fechaFinStr.split('-');
+                        if (partesI.length === 3 && partesF.length === 3) {
+                            return `Del ${partesI[2]}/${partesI[1]}/${partesI[0]} al ${partesF[2]}/${partesF[1]}/${partesF[0]}`;
+                        }
+                    }
+                    return `Corte al: ${fechaFinStr || fechaStr || ''}`;
                 case 'todo':
                 default:
                     return 'Histórico Completo';
@@ -1501,20 +1875,20 @@
         }
 
         // Sincronizar todos los inputs y selects de periodo en todas las pestañas
-        function sincronizarBarrasPeriodo(tipo, fecha) {
+        function sincronizarBarrasPeriodo(tipo, fecha, fechaInicio, fechaFin) {
             const hoy = new Date().toISOString().split('T')[0];
+            const primerDia = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+
             const tipoFinal = tipo || 'todo';
             const fechaFinal = fecha || hoy;
+            const inicioFinal = fechaInicio || primerDia;
+            const finFinal = fechaFin || hoy;
 
             window.estadoPeriodoActual.tipo = tipoFinal;
             window.estadoPeriodoActual.fecha = fechaFinal;
+            window.estadoPeriodoActual.fechaInicio = inicioFinal;
+            window.estadoPeriodoActual.fechaFin = finFinal;
             state.periodo = window.estadoPeriodoActual;
-
-            const btnExportar = document.getElementById('btn-exportar-excel');
-            if (btnExportar) {
-                btnExportar.dataset.tipoPeriodo = tipoFinal;
-                btnExportar.dataset.fechaPeriodo = fechaFinal;
-            }
 
             document.querySelectorAll('.select-periodo-global').forEach(el => {
                 el.value = tipoFinal;
@@ -1522,8 +1896,25 @@
             document.querySelectorAll('.input-fecha-global').forEach(el => {
                 el.value = fechaFinal;
             });
+            document.querySelectorAll('.input-fecha-inicio-global').forEach(el => {
+                el.value = inicioFinal;
+            });
+            document.querySelectorAll('.input-fecha-fin-global').forEach(el => {
+                el.value = finFinal;
+            });
 
-            const desc = obtenerDescripcionPeriodo(tipoFinal, fechaFinal);
+            // Conmutar visibilidad entre fecha única y rango personalizado
+            const esPersonalizado = (tipoFinal === 'personalizado');
+            document.querySelectorAll('.contenedor-fecha-unica').forEach(el => {
+                if (esPersonalizado) el.classList.add('d-none');
+                else el.classList.remove('d-none');
+            });
+            document.querySelectorAll('.contenedor-rango-personalizado').forEach(el => {
+                if (esPersonalizado) el.classList.remove('d-none');
+                else el.classList.add('d-none');
+            });
+
+            const desc = obtenerDescripcionPeriodo(tipoFinal, fechaFinal, inicioFinal, finFinal);
             const bDiario = document.getElementById('badge-periodo-diario');
             if (bDiario) bDiario.textContent = `Período: ${desc}`;
             const bMayor = document.getElementById('badge-periodo-mayor');
@@ -1532,11 +1923,28 @@
             if (bBalanza) bBalanza.textContent = `Período: ${desc}`;
             const bEstados = document.getElementById('badge-periodo-estados');
             if (bEstados) bEstados.innerHTML = `<i class="bi bi-clock-history me-1"></i> Período: ${desc}`;
+
+            // Actualizar subtítulos en hojas de trabajo contables y libros
+            const subtituloCompleto = `Período: ${desc} | Expresado en Córdobas (C$)`;
+            const subDia = document.getElementById('diario-subtitulo-periodo');
+            if (subDia) subDia.textContent = subtituloCompleto;
+            const subMay = document.getElementById('mayor-subtitulo-periodo');
+            if (subMay) subMay.textContent = subtituloCompleto;
+            const subBalz = document.getElementById('balanza-subtitulo-periodo');
+            if (subBalz) subBalz.textContent = subtituloCompleto;
+            const subBalResumen = document.getElementById('balance-resumen-subtitulo-periodo');
+            if (subBalResumen) subBalResumen.textContent = subtituloCompleto;
+            const subBal = document.getElementById('balance-subtitulo-periodo');
+            if (subBal) subBal.textContent = subtituloCompleto;
+            const subRes = document.getElementById('resultados-subtitulo-periodo');
+            if (subRes) subRes.textContent = subtituloCompleto;
+            const subFlu = document.getElementById('flujo-subtitulo-periodo');
+            if (subFlu) subFlu.textContent = subtituloCompleto;
         }
 
         // Aplicar periodo y recargar la vista activa o todos los reportes
-        async function aplicarPeriodoGlobal(tipo, fecha) {
-            sincronizarBarrasPeriodo(tipo, fecha);
+        async function aplicarPeriodoGlobal(tipo, fecha, fechaInicio, fechaFin) {
+            sincronizarBarrasPeriodo(tipo, fecha, fechaInicio, fechaFin);
 
             // Refrescar datos
             await Promise.all([
@@ -1546,7 +1954,7 @@
                 cargarTodosLosEstadosFinancieros()
             ]);
 
-            mostrarToast(`Filtro aplicado: ${obtenerDescripcionPeriodo(tipo, fecha)}`, 'info');
+            mostrarToast(`Filtro aplicado: ${obtenerDescripcionPeriodo(tipo, fecha, fechaInicio, fechaFin)}`, 'info');
         }
 
         // Formateador de moneda profesional en Córdobas (C$)
@@ -1624,30 +2032,315 @@
         document.addEventListener('MSFullscreenChange', actualizarIconoPantallaCompleta);
 
         // ========================================================
-        // 1. CONTROL DE ACCESO / LOGIN
+        // 1. CONTROL DE ACCESO / LOGIN Y GESTIÓN DE SESIÓN
         // ========================================================
-        document.getElementById('form-login').addEventListener('submit', (e) => {
+        const KEY_TOKEN = 'metro_session_token';
+        const KEY_USER_DATA = 'metro_user_data';
+        const KEY_ULTIMO_USUARIO = 'metro_ultimo_usuario';
+
+        // Helper para peticiones autenticadas
+        async function fetchAutenticado(url, options = {}) {
+            const token = sessionStorage.getItem(KEY_TOKEN);
+            const headers = new Headers(options.headers || {});
+            if (token) {
+                headers.set('Authorization', `Bearer ${token}`);
+            }
+            options.headers = headers;
+
+            const res = await fetch(url, options);
+            if (res.status === 401) {
+                // Sesión inválida o expirada -> Cerrar sesión y volver al login
+                cerrarSesionLocal();
+                mostrarToast('Su sesión ha expirado o es inválida. Por favor ingrese de nuevo.', 'warning');
+                return res;
+            }
+            return res;
+        }
+
+        // Configuración y Recordatorio Inteligente de Usuario al Cargar
+        function prepararPantallaLogin() {
+            const inputUsuario = document.getElementById('login-usuario');
+            const inputPassword = document.getElementById('login-password');
+            const enlaceOtraCuenta = document.getElementById('enlace-otra-cuenta');
+            const alerta = document.getElementById('login-alerta');
+            if (alerta) alerta.classList.add('d-none');
+
+            inputPassword.value = '';
+
+            const ultimoUsuario = localStorage.getItem(KEY_ULTIMO_USUARIO);
+            if (ultimoUsuario && ultimoUsuario.trim()) {
+                inputUsuario.value = ultimoUsuario.trim();
+                if (enlaceOtraCuenta) enlaceOtraCuenta.classList.remove('d-none');
+                setTimeout(() => inputPassword.focus(), 150);
+            } else {
+                inputUsuario.value = '';
+                if (enlaceOtraCuenta) enlaceOtraCuenta.classList.add('d-none');
+                setTimeout(() => inputUsuario.focus(), 150);
+            }
+        }
+
+        function usarOtraCuenta() {
+            localStorage.removeItem(KEY_ULTIMO_USUARIO);
+            const inputUsuario = document.getElementById('login-usuario');
+            const inputPassword = document.getElementById('login-password');
+            const enlaceOtraCuenta = document.getElementById('enlace-otra-cuenta');
+            if (inputUsuario) inputUsuario.value = '';
+            if (inputPassword) inputPassword.value = '';
+            if (enlaceOtraCuenta) enlaceOtraCuenta.classList.add('d-none');
+            if (inputUsuario) inputUsuario.focus();
+        }
+
+        // Manejador del Formulario de Login
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
             e.preventDefault();
             const usuario = document.getElementById('login-usuario').value.trim();
-            const pass = document.getElementById('login-password').value.trim();
+            const pass = document.getElementById('login-password').value;
             const alerta = document.getElementById('login-alerta');
             const alertaTexto = document.getElementById('login-alerta-texto');
+            const btnLogin = document.getElementById('btn-login');
 
-            if (usuario === 'admin' && pass === '1234') {
-                alerta.classList.add('d-none');
-                document.getElementById('login-container').classList.add('d-none');
-                document.getElementById('app-container').classList.remove('d-none');
-                inicializarSistema();
-            } else {
-                alertaTexto.textContent = 'Credenciales inválidas. Ingrese usuario: admin y contraseña: 1234';
+            if (!usuario || !pass) {
+                alertaTexto.textContent = 'Por favor complete su usuario y contraseña.';
                 alerta.classList.remove('d-none');
+                return;
+            }
+
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Ingresando...`;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usuario, password: pass })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    sessionStorage.setItem(KEY_TOKEN, data.token);
+                    sessionStorage.setItem(KEY_USER_DATA, JSON.stringify(data));
+                    localStorage.setItem(KEY_ULTIMO_USUARIO, data.username || usuario);
+
+                    // Actualizar nombre en la navbar
+                    const navUser = document.getElementById('nav-usuario-nombre');
+                    if (navUser) navUser.textContent = data.nombreCompleto || data.username || 'Administrador';
+
+                    alerta.classList.add('d-none');
+                    document.getElementById('login-container').classList.add('d-none');
+                    document.getElementById('app-container').classList.remove('d-none');
+                    inicializarSistema();
+                } else {
+                    alertaTexto.textContent = 'Usuario o contraseña incorrectos. Verifique sus credenciales.';
+                    alerta.classList.remove('d-none');
+                    document.getElementById('login-password').value = '';
+                    document.getElementById('login-password').focus();
+                }
+            } catch (err) {
+                console.error('Error al iniciar sesión:', err);
+                alertaTexto.textContent = 'Error al conectar con el servidor: ' + err.message;
+                alerta.classList.remove('d-none');
+            } finally {
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = `<span>Ingresar al Sistema</span> <i class="bi bi-arrow-right"></i>`;
             }
         });
 
-        document.getElementById('btn-cerrar-sesion').addEventListener('click', () => {
+        // Cerrar sesión
+        function cerrarSesionLocal() {
+            sessionStorage.removeItem(KEY_TOKEN);
+            sessionStorage.removeItem(KEY_USER_DATA);
             document.getElementById('app-container').classList.add('d-none');
             document.getElementById('login-container').classList.remove('d-none');
-            document.getElementById('login-password').value = '';
+            prepararPantallaLogin();
+        }
+
+        document.getElementById('btn-cerrar-sesion').addEventListener('click', async () => {
+            try {
+                await fetchAutenticado('/api/auth/logout', { method: 'POST' });
+            } catch (err) {
+                console.warn('Error al notificar logout al backend:', err);
+            }
+            cerrarSesionLocal();
+            mostrarToast('Ha cerrado sesión exitosamente.', 'info');
+        });
+
+        // ----------------------------------------------------
+        // Modales de Seguridad y Recuperación de Contraseña
+        // ----------------------------------------------------
+        let modalSeguridadBS = null;
+        let modalRecuperarBS = null;
+
+        function abrirModalSeguridad() {
+            const el = document.getElementById('modal-seguridad');
+            if (!el) return;
+            document.getElementById('alerta-modal-seguridad').classList.add('d-none');
+            document.getElementById('form-cambiar-password').reset();
+            if (!modalSeguridadBS) modalSeguridadBS = new bootstrap.Modal(el);
+            modalSeguridadBS.show();
+        }
+
+        document.getElementById('form-cambiar-password').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const passActual = document.getElementById('cambio-pass-actual').value;
+            const passNueva = document.getElementById('cambio-pass-nueva').value;
+            const passConf = document.getElementById('cambio-pass-confirmar').value;
+            const pregunta = document.getElementById('cambio-pregunta').value.trim();
+            const respuesta = document.getElementById('cambio-respuesta').value.trim();
+            const alerta = document.getElementById('alerta-modal-seguridad');
+            const btnGuardar = document.getElementById('btn-guardar-password');
+
+            if (passNueva !== passConf) {
+                alerta.textContent = 'La confirmación de la nueva contraseña no coincide.';
+                alerta.classList.remove('d-none');
+                return;
+            }
+
+            if (passNueva.length < 6) {
+                alerta.textContent = 'La nueva contraseña debe tener al menos 6 caracteres.';
+                alerta.classList.remove('d-none');
+                return;
+            }
+
+            btnGuardar.disabled = true;
+            btnGuardar.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Guardando...`;
+
+            try {
+                const res = await fetchAutenticado('/api/auth/cambiar-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        passwordActual: passActual,
+                        passwordNueva: passNueva,
+                        preguntaSeguridad: pregunta || null,
+                        respuestaSeguridad: respuesta || null
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    mostrarToast(data.mensaje || 'Seguridad actualizada exitosamente.', 'success');
+                    if (modalSeguridadBS) modalSeguridadBS.hide();
+                } else {
+                    alerta.textContent = data.error || 'Error al actualizar la contraseña.';
+                    alerta.classList.remove('d-none');
+                }
+            } catch (err) {
+                alerta.textContent = 'Error de conexión: ' + err.message;
+                alerta.classList.remove('d-none');
+            } finally {
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = `<i class="bi bi-check2-circle me-1"></i> Actualizar Seguridad`;
+            }
+        });
+
+        function abrirModalRecuperarAcceso() {
+            const el = document.getElementById('modal-recuperar');
+            if (!el) return;
+            document.getElementById('alerta-modal-recuperar').classList.add('d-none');
+            document.getElementById('form-recuperar-password').reset();
+            document.getElementById('recuperar-paso2').classList.add('d-none');
+            document.getElementById('btn-confirmar-recuperacion').classList.add('d-none');
+
+            // Autocompletar con el usuario de login si existe
+            const usuarioLogin = document.getElementById('login-usuario').value.trim();
+            if (usuarioLogin) {
+                document.getElementById('recuperar-usuario').value = usuarioLogin;
+            }
+
+            if (!modalRecuperarBS) modalRecuperarBS = new bootstrap.Modal(el);
+            modalRecuperarBS.show();
+        }
+
+        async function consultarPreguntaSeguridad() {
+            const usuario = document.getElementById('recuperar-usuario').value.trim();
+            const alerta = document.getElementById('alerta-modal-recuperar');
+            const btnConsultar = document.getElementById('btn-consultar-pregunta');
+
+            if (!usuario) {
+                alerta.textContent = 'Por favor ingrese su nombre de usuario.';
+                alerta.classList.remove('d-none');
+                return;
+            }
+
+            btnConsultar.disabled = true;
+            btnConsultar.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`;
+
+            try {
+                const res = await fetch(`/api/auth/pregunta/${encodeURIComponent(usuario)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    alerta.classList.add('d-none');
+                    document.getElementById('recuperar-texto-pregunta').textContent = data.preguntaSeguridad || '¿Pregunta confidencial?';
+                    document.getElementById('recuperar-paso2').classList.remove('d-none');
+                    document.getElementById('btn-confirmar-recuperacion').classList.remove('d-none');
+                    document.getElementById('recuperar-respuesta').focus();
+                } else {
+                    alerta.textContent = 'No se encontró ninguna cuenta registrada con el usuario especificado.';
+                    alerta.classList.remove('d-none');
+                    document.getElementById('recuperar-paso2').classList.add('d-none');
+                    document.getElementById('btn-confirmar-recuperacion').classList.add('d-none');
+                }
+            } catch (err) {
+                alerta.textContent = 'Error de conexión: ' + err.message;
+                alerta.classList.remove('d-none');
+            } finally {
+                btnConsultar.disabled = false;
+                btnConsultar.innerHTML = `<i class="bi bi-search me-1"></i> Continuar`;
+            }
+        }
+
+        document.getElementById('form-recuperar-password').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const usuario = document.getElementById('recuperar-usuario').value.trim();
+            const respuesta = document.getElementById('recuperar-respuesta').value.trim();
+            const claveNueva = document.getElementById('recuperar-nueva-clave').value;
+            const claveConf = document.getElementById('recuperar-confirmar-clave').value;
+            const alerta = document.getElementById('alerta-modal-recuperar');
+            const btnConfirmar = document.getElementById('btn-confirmar-recuperacion');
+
+            if (claveNueva !== claveConf) {
+                alerta.textContent = 'La confirmación de la nueva contraseña no coincide.';
+                alerta.classList.remove('d-none');
+                return;
+            }
+
+            if (claveNueva.length < 6) {
+                alerta.textContent = 'La nueva contraseña debe tener al menos 6 caracteres.';
+                alerta.classList.remove('d-none');
+                return;
+            }
+
+            btnConfirmar.disabled = true;
+            btnConfirmar.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Restableciendo...`;
+
+            try {
+                const res = await fetch('/api/auth/recuperar-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: usuario,
+                        respuestaSeguridad: respuesta,
+                        passwordNueva: claveNueva
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    mostrarToast(data.mensaje || 'Contraseña restablecida exitosamente.', 'success');
+                    if (modalRecuperarBS) modalRecuperarBS.hide();
+                    localStorage.setItem(KEY_ULTIMO_USUARIO, usuario);
+                    prepararPantallaLogin();
+                } else {
+                    alerta.textContent = data.error || 'La respuesta a la pregunta de seguridad es incorrecta.';
+                    alerta.classList.remove('d-none');
+                }
+            } catch (err) {
+                alerta.textContent = 'Error de conexión: ' + err.message;
+                alerta.classList.remove('d-none');
+            } finally {
+                btnConfirmar.disabled = false;
+                btnConfirmar.innerHTML = `<i class="bi bi-check2-circle me-1"></i> Restablecer Contraseña`;
+            }
         });
 
         // ========================================================
@@ -1672,29 +2365,56 @@
             cargarHistorialAsientos();
 
             // Inicializar inputs y botones con el periodo por defecto ('todo')
-            sincronizarBarrasPeriodo('todo', hoy);
+            const initP = obtenerPeriodoActivo();
+            sincronizarBarrasPeriodo('todo', initP.fecha, initP.fechaInicio, initP.fechaFin);
 
             // Sincronización instantánea de eventos en cualquier selector de período
             document.querySelectorAll('.select-periodo-global').forEach(sel => {
                 sel.addEventListener('change', (e) => {
                     const tipo = e.target.value;
-                    const fecha = obtenerPeriodoActivo().fecha;
-                    sincronizarBarrasPeriodo(tipo, fecha);
+                    const p = obtenerPeriodoActivo();
+                    sincronizarBarrasPeriodo(tipo, p.fecha, p.fechaInicio, p.fechaFin);
                 });
             });
 
             document.querySelectorAll('.input-fecha-global').forEach(inp => {
                 inp.addEventListener('change', (e) => {
                     const fecha = e.target.value;
-                    const tipo = obtenerPeriodoActivo().tipo;
-                    sincronizarBarrasPeriodo(tipo, fecha);
+                    const p = obtenerPeriodoActivo();
+                    sincronizarBarrasPeriodo(p.tipo, fecha, p.fechaInicio, p.fechaFin);
+                });
+            });
+
+            document.querySelectorAll('.input-fecha-inicio-global').forEach(inp => {
+                inp.addEventListener('change', (e) => {
+                    const fechaInicio = e.target.value;
+                    const p = obtenerPeriodoActivo();
+                    sincronizarBarrasPeriodo(p.tipo, p.fecha, fechaInicio, p.fechaFin);
+                });
+            });
+
+            document.querySelectorAll('.input-fecha-fin-global').forEach(inp => {
+                inp.addEventListener('change', (e) => {
+                    const fechaFin = e.target.value;
+                    const p = obtenerPeriodoActivo();
+                    sincronizarBarrasPeriodo(p.tipo, p.fecha, p.fechaInicio, fechaFin);
                 });
             });
 
             document.querySelectorAll('.btn-filtrar-periodo-global').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const { tipo, fecha } = obtenerPeriodoActivo();
-                    aplicarPeriodoGlobal(tipo, fecha);
+                btn.addEventListener('click', async () => {
+                    const p = obtenerPeriodoActivo();
+                    if (p.tipo === 'personalizado') {
+                        if (!p.fechaInicio || !p.fechaFin) {
+                            alert('Debe especificar tanto la Fecha Inicio (Desde) como la Fecha Fin (Hasta).');
+                            return;
+                        }
+                        if (p.fechaInicio > p.fechaFin) {
+                            alert('La Fecha Inicio (Desde) debe ser menor o igual a la Fecha Fin (Hasta).');
+                            return;
+                        }
+                    }
+                    await aplicarPeriodoGlobal(p.tipo, p.fecha, p.fechaInicio, p.fechaFin);
                 });
             });
 
@@ -1765,11 +2485,6 @@
                 });
             }
 
-            // Botón Global de Exportación a Excel
-            const btnExportarExcel = document.getElementById('btn-exportar-excel');
-            if (btnExportarExcel) {
-                btnExportarExcel.addEventListener('click', exportarTodoAExcel);
-            }
 
             // ========================================================
             // EVENTOS Y VALIDACIONES DEL MODAL: NUEVA CUENTA CONTABLE
@@ -1887,7 +2602,7 @@
                             cuentaPadreCodigo: padre || null
                         };
 
-                        const res = await fetch('/api/cuentas', {
+                        const res = await fetchAutenticado('/api/cuentas', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(payload)
@@ -1925,8 +2640,8 @@
         async function cargarCuentas() {
             try {
                 const [resTodas, resOperativas] = await Promise.all([
-                    fetch('/api/cuentas'),
-                    fetch('/api/cuentas/operativas')
+                    fetchAutenticado('/api/cuentas'),
+                    fetchAutenticado('/api/cuentas/operativas')
                 ]);
 
                 if (resTodas.ok) {
@@ -2269,7 +2984,7 @@
             }
 
             try {
-                const res = await fetch('/api/asientos', {
+                const res = await fetchAutenticado('/api/asientos', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -2310,7 +3025,7 @@
         async function cargarHistorialAsientos() {
             const tbody = document.getElementById('historial-asientos-tbody');
             try {
-                const res = await fetch('/api/asientos/libro-diario' + obtenerQueryPeriodo());
+                const res = await fetchAutenticado('/api/asientos/libro-diario' + obtenerQueryPeriodo());
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 state.asientos = await res.json();
                 renderizarHistorialAsientos(document.getElementById('filtro-historial').value.trim().toLowerCase());
@@ -2463,7 +3178,7 @@
         function renderizarTablaCatalogo(filtro = '') {
             const tbody = document.getElementById('catalogo-tbody');
             if (!state.todasLasCuentas || state.todasLasCuentas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No hay cuentas disponibles en el catálogo.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No hay cuentas disponibles en el catálogo.</td></tr>`;
                 return;
             }
 
@@ -2482,7 +3197,7 @@
             document.getElementById('contador-cuentas-inactivas').innerHTML = `<i class="bi bi-x-circle"></i> Inactivas: <strong>${inactivas}</strong>`;
 
             if (cuentasFiltradas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No se encontraron cuentas con el criterio: "<strong>${filtro}</strong>"</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No se encontraron cuentas con el criterio: "<strong>${filtro}</strong>"</td></tr>`;
                 return;
             }
 
@@ -2531,9 +3246,47 @@
                                 </span>
                             </div>
                         </td>
+                        <td class="text-center">
+                            <button class="btn btn-outline-danger btn-sm btn-eliminar-cuenta" data-codigo="${codigo}" data-nombre="${nombre}" title="Eliminar cuenta">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </td>
                     </tr>
                 `;
             }).join('');
+
+            // Asignar listeners a botones de eliminar cuenta
+            document.querySelectorAll('.btn-eliminar-cuenta').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const codigo = btn.getAttribute('data-codigo');
+                    const nombre = btn.getAttribute('data-nombre');
+
+                    if (!confirm(`¿Está seguro de eliminar la cuenta [${codigo}] ${nombre}?\n\nEsta acción no se puede deshacer.`)) {
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    try {
+                        const res = await fetchAutenticado(`/api/cuentas/${encodeURIComponent(codigo)}`, {
+                            method: 'DELETE'
+                        });
+
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok) {
+                            const errorMsg = data.mensaje || data.error || `HTTP ${res.status}: No se pudo eliminar la cuenta.`;
+                            alert(errorMsg);
+                            return;
+                        }
+
+                        mostrarToast(data.mensaje || `Cuenta [${codigo}] eliminada exitosamente.`, 'success');
+                        await cargarCuentas();
+                    } catch (err) {
+                        alert('Error de conexión al eliminar cuenta: ' + err.message);
+                    } finally {
+                        btn.disabled = false;
+                    }
+                });
+            });
 
             // Asignar listeners a switches
             document.querySelectorAll('.switch-cuenta').forEach(sw => {
@@ -2545,7 +3298,7 @@
                     switchEl.disabled = true;
 
                     try {
-                        const res = await fetch(`/api/cuentas/${codigo}/toggle-estado`, {
+                        const res = await fetchAutenticado(`/api/cuentas/${codigo}/toggle-estado`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' }
                         });
@@ -2584,7 +3337,7 @@
 
                         mostrarToast(`Cuenta [${codigo}] ahora está ${estadoConfirmado ? 'ACTIVA' : 'INACTIVA'}.`, 'success');
 
-                        const resOp = await fetch('/api/cuentas/operativas');
+                        const resOp = await fetchAutenticado('/api/cuentas/operativas');
                         if (resOp.ok) {
                             state.cuentasOperativas = await resOp.json();
                             actualizarDatalistOperativas();
@@ -2611,8 +3364,8 @@
             try {
                 const query = obtenerQueryPeriodo();
                 const [resMayor, resAsientos] = await Promise.all([
-                    fetch('/api/reportes/libro-mayor' + query),
-                    fetch('/api/asientos/libro-diario' + query)
+                    fetchAutenticado('/api/reportes/libro-mayor' + query),
+                    fetchAutenticado('/api/asientos/libro-diario' + query)
                 ]);
 
                 if (!resMayor.ok) throw new Error(`HTTP ${resMayor.status}`);
@@ -2872,7 +3625,7 @@
         // ========================================================
         async function cargarBalanzaComprobacion() {
             try {
-                const res = await fetch('/api/reportes/balanza-comprobacion' + obtenerQueryPeriodo());
+                const res = await fetchAutenticado('/api/reportes/balanza-comprobacion' + obtenerQueryPeriodo());
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 state.balanza = await res.json();
                 renderizarBalanzaComprobacion();
@@ -2969,36 +3722,44 @@
         // 8.1 Balance General
         async function cargarBalanceGeneral() {
             try {
-                const res = await fetch('/api/reportes/balance-general' + obtenerQueryPeriodo());
-                if (!res.ok) {
-                    const errJson = await res.json().catch(() => ({ error: 'Error al consultar balance general.' }));
-                    throw new Error(errJson.error || `HTTP ${res.status}`);
+                const query = obtenerQueryPeriodo();
+                const [resBal, resMayor] = await Promise.all([
+                    fetchAutenticado('/api/reportes/balance-general' + query),
+                    fetchAutenticado('/api/reportes/libro-mayor' + query)
+                ]);
+
+                if (!resBal.ok) {
+                    const errJson = await resBal.json().catch(() => ({ error: 'Error al consultar balance general.' }));
+                    throw new Error(errJson.error || `HTTP ${resBal.status}`);
                 }
-                state.balance = await res.json();
+                state.balance = await resBal.json();
+                if (resMayor.ok) {
+                    state.mayor = await resMayor.json();
+                }
                 renderizarBalanceGeneral();
             } catch (err) {
                 console.error('Error al cargar balance:', err);
-                const banner = document.getElementById('banner-equilibrio');
-                banner.className = 'alert alert-warning d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm border-warning';
-                document.getElementById('banner-icono').className = 'bi bi-exclamation-triangle fs-2 text-warning';
-                document.getElementById('banner-titulo').textContent = 'Información de Balance';
-                document.getElementById('banner-descripcion').textContent = err.message;
-                document.getElementById('banner-badge').className = 'badge bg-warning text-dark fs-6 px-3 py-2';
-                document.getElementById('banner-badge').textContent = 'Aviso Contable';
+                const tbody = document.getElementById('balance-detallado-tbody');
+                if (tbody) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-danger"><i class="bi bi-x-circle me-1"></i> Error al cargar balance: ${err.message}</td></tr>`;
+                }
             }
         }
 
         function renderizarBalanceGeneral() {
-            if (!state.balance) return;
+            const tbody = document.getElementById('balance-detallado-tbody');
+            if (!tbody || !state.balance) return;
 
-            // Total Activo y Total Pasivo respetando la posición real corregida
-            const activo = Math.abs(state.balance.activo ?? state.balance.Activo ?? 0);
-            const pasivo = Math.abs(state.balance.pasivo ?? state.balance.Pasivo ?? 0);
-            const capital = state.balance.capital ?? state.balance.Capital ?? 0;
-            const utilidadNeta = state.balance.utilidadNeta ?? state.balance.UtilidadNeta ?? 0;
+            // Período dinámico en encabezado
+            const desc = obtenerDescripcionPeriodo(state.periodo?.tipo, state.periodo?.fecha, state.periodo?.fechaInicio, state.periodo?.fechaFin);
+            const subtituloFormateado = `Período: ${desc} | Expresado en Córdobas (C$)`;
+            const subPeriodo = document.getElementById('balance-subtitulo-periodo');
+            if (subPeriodo) subPeriodo.textContent = subtituloFormateado;
+            const subPeriodoResumen = document.getElementById('balance-resumen-subtitulo-periodo');
+            if (subPeriodoResumen) subPeriodoResumen.textContent = subtituloFormateado;
+
+            // Aviso de saldos anormales
             const tieneSaldosAnormales = Boolean(state.balance.tieneSaldosAnormales ?? state.balance.TieneSaldosAnormales);
-
-            // Aviso de saldos anormales (anticipos o sobregiros)
             const alertaAnormales = document.getElementById('alerta-balance-anormales');
             if (alertaAnormales) {
                 if (tieneSaldosAnormales) {
@@ -3010,69 +3771,334 @@
                 }
             }
 
-            document.getElementById('kpi-activo').textContent = formatoNumero(activo);
-            document.getElementById('kpi-pasivo').textContent = formatoNumero(pasivo);
-            document.getElementById('kpi-capital').textContent = formatoNumero(capital);
+            // Cuentas con movimientos o saldo != 0 en el período consultado
+            const cuentasBase = (state.mayor && state.mayor.length > 0) ? state.mayor : [];
 
-            const cardUtilidad = document.getElementById('card-utilidad');
-            const iconoUtilidad = document.getElementById('icono-utilidad');
-            const tituloUtilidad = document.getElementById('kpi-utilidad-titulo');
-            const descUtilidad = document.getElementById('kpi-utilidad-desc');
-            const resumenUtilidad = document.getElementById('resumen-utilidad-capital');
+            // Filtrar estrictamente cuentas con movimientos o saldo != 0
+            const cuentasConSaldo = cuentasBase.filter(c => {
+                const debe = parseFloat(c.totalDebe ?? c.TotalDebe ?? 0);
+                const haber = parseFloat(c.totalHaber ?? c.TotalHaber ?? 0);
+                const saldoD = parseFloat(c.saldoDeudor ?? c.SaldoDeudor ?? 0);
+                const saldoA = parseFloat(c.saldoAcreedor ?? c.SaldoAcreedor ?? 0);
+                return Math.abs(debe) > 0.0001 || Math.abs(haber) > 0.0001 || Math.abs(saldoD) > 0.0001 || Math.abs(saldoA) > 0.0001;
+            });
 
-            if (utilidadNeta >= 0) {
-                cardUtilidad.className = 'card kpi-card kpi-utilidad p-3 shadow-sm';
-                iconoUtilidad.className = 'bi bi-graph-up-arrow fs-4';
-                if (tituloUtilidad) tituloUtilidad.textContent = 'Utilidad Neta';
-                document.getElementById('kpi-utilidad').textContent = formatoNumero(utilidadNeta);
-                descUtilidad.textContent = 'Resultado Positivo (Aumenta el Capital)';
-                if (resumenUtilidad) resumenUtilidad.innerHTML = `<span class="text-success fw-bold">${formatoNumero(utilidadNeta)} (Utilidad del Ejercicio)</span>`;
+            // 1. Clasificación de Activos
+            const cActivos = cuentasConSaldo.filter(c => {
+                const tipo = (c.tipo || c.Tipo || '').toString().toLowerCase();
+                const cod = (c.codigo || c.Codigo || '').toString();
+                return tipo.includes('activo') || cod.startsWith('1');
+            });
+
+            const cActivoCorriente = cActivos.filter(c => {
+                const cod = (c.codigo || c.Codigo || '').toString();
+                return cod.startsWith('11') || (!cod.startsWith('12') && !cod.startsWith('13'));
+            });
+
+            const cActivoNoCorriente = cActivos.filter(c => {
+                const cod = (c.codigo || c.Codigo || '').toString();
+                return cod.startsWith('12') || cod.startsWith('13');
+            });
+
+            // 2. Clasificación de Pasivos
+            const cPasivos = cuentasConSaldo.filter(c => {
+                const tipo = (c.tipo || c.Tipo || '').toString().toLowerCase();
+                const cod = (c.codigo || c.Codigo || '').toString();
+                return tipo.includes('pasivo') || cod.startsWith('2');
+            });
+
+            const cPasivoCorriente = cPasivos.filter(c => {
+                const cod = (c.codigo || c.Codigo || '').toString();
+                return cod.startsWith('21') || (!cod.startsWith('22') && !cod.startsWith('23'));
+            });
+
+            const cPasivoNoCorriente = cPasivos.filter(c => {
+                const cod = (c.codigo || c.Codigo || '').toString();
+                return cod.startsWith('22') || cod.startsWith('23');
+            });
+
+            // 3. Clasificación de Capital
+            const cCapital = cuentasConSaldo.filter(c => {
+                const tipo = (c.tipo || c.Tipo || '').toString().toLowerCase();
+                const cod = (c.codigo || c.Codigo || '').toString();
+                return tipo.includes('capital') || cod.startsWith('3');
+            });
+
+            // Cálculos de subtotales
+            const calcSaldoCuenta = (c, esDeudoraDefecto) => {
+                const d = parseFloat(c.totalDebe ?? c.TotalDebe ?? 0);
+                const h = parseFloat(c.totalHaber ?? c.TotalHaber ?? 0);
+                const sD = parseFloat(c.saldoDeudor ?? c.SaldoDeudor ?? 0);
+                const sA = parseFloat(c.saldoAcreedor ?? c.SaldoAcreedor ?? 0);
+                if (sD > 0 || sA > 0) return esDeudoraDefecto ? (sD > 0 ? sD : -sA) : (sA > 0 ? sA : -sD);
+                return esDeudoraDefecto ? (d - h) : (h - d);
+            };
+
+            const totActivoCorriente = cActivoCorriente.reduce((acc, c) => acc + calcSaldoCuenta(c, true), 0);
+            const totActivoNoCorriente = cActivoNoCorriente.reduce((acc, c) => acc + calcSaldoCuenta(c, true), 0);
+            const totActivo = Math.abs(state.balance.activo ?? (totActivoCorriente + totActivoNoCorriente));
+
+            const totPasivoCorriente = cPasivoCorriente.reduce((acc, c) => acc + calcSaldoCuenta(c, false), 0);
+            const totPasivoNoCorriente = cPasivoNoCorriente.reduce((acc, c) => acc + calcSaldoCuenta(c, false), 0);
+            const totPasivo = Math.abs(state.balance.pasivo ?? (totPasivoCorriente + totPasivoNoCorriente));
+
+            const totCapitalSocial = cCapital.reduce((acc, c) => acc + calcSaldoCuenta(c, false), 0);
+            const utilidadNeta = state.balance.utilidadNeta ?? state.balance.UtilidadNeta ?? 0;
+            const totCapital = state.balance.capital ?? (totCapitalSocial + utilidadNeta);
+
+            const totPasivoMasCapital = totPasivo + totCapital;
+            const diferencia = Math.abs(totActivo - totPasivoMasCapital);
+            const estaCuadrado = diferencia < 0.01;
+
+            let html = '';
+
+            // --- SECCIÓN: ACTIVO ---
+            html += `<tr class="table-light"><td colspan="4" class="fw-bold text-uppercase text-dark"><i class="bi bi-wallet2 me-1 text-primary"></i> ACTIVO</td></tr>`;
+
+            // Activo Corriente
+            html += `<tr><td></td><td class="fw-bold text-secondary text-uppercase ps-3">ACTIVO CORRIENTE / CIRCULANTE</td><td></td><td></td></tr>`;
+            if (cActivoCorriente.length === 0) {
+                html += `<tr><td class="font-monospace text-muted ps-3">-</td><td class="fst-italic text-muted ps-4">Sin cuentas con movimientos</td><td class="text-end font-numeric text-muted">${formatoNumero(0)}</td><td></td></tr>`;
             } else {
-                cardUtilidad.className = 'card kpi-card kpi-utilidad-negativa p-3 shadow-sm';
-                iconoUtilidad.className = 'bi bi-graph-down-arrow fs-4';
-                if (tituloUtilidad) tituloUtilidad.textContent = 'Pérdida Neta del Ejercicio';
-                document.getElementById('kpi-utilidad').textContent = formatoNumero(utilidadNeta);
-                descUtilidad.textContent = 'Pérdida Neta (Disminución patrimonial que resta al Capital)';
-                if (resumenUtilidad) resumenUtilidad.innerHTML = `<span class="text-danger fw-bold">${formatoNumero(utilidadNeta)} (Pérdida Neta)</span>`;
+                cActivoCorriente.forEach(c => {
+                    const saldo = calcSaldoCuenta(c, true);
+                    html += `<tr>
+                        <td class="font-monospace ps-3">${c.codigo || c.Codigo}</td>
+                        <td class="ps-4">${c.nombre || c.Nombre}</td>
+                        <td class="text-end font-numeric">${formatoNumero(saldo)}</td>
+                        <td></td>
+                    </tr>`;
+                });
+            }
+            html += `<tr class="fw-semibold">
+                <td></td>
+                <td class="text-end text-uppercase ps-3">Total Activo Corriente:</td>
+                <td></td>
+                <td class="text-end font-numeric linea-subtotal">${formatoNumero(totActivoCorriente)}</td>
+            </tr>`;
+
+            // Activo No Corriente (si existe)
+            if (cActivoNoCorriente.length > 0) {
+                html += `<tr><td></td><td class="fw-bold text-secondary text-uppercase ps-3">ACTIVO NO CORRIENTE / FIJO</td><td></td><td></td></tr>`;
+                cActivoNoCorriente.forEach(c => {
+                    const saldo = calcSaldoCuenta(c, true);
+                    html += `<tr>
+                        <td class="font-monospace ps-3">${c.codigo || c.Codigo}</td>
+                        <td class="ps-4">${c.nombre || c.Nombre}</td>
+                        <td class="text-end font-numeric">${formatoNumero(saldo)}</td>
+                        <td></td>
+                    </tr>`;
+                });
+                html += `<tr class="fw-semibold">
+                    <td></td>
+                    <td class="text-end text-uppercase ps-3">Total Activo No Corriente:</td>
+                    <td></td>
+                    <td class="text-end font-numeric linea-subtotal">${formatoNumero(totActivoNoCorriente)}</td>
+                </tr>`;
             }
 
-            const ladoDerecho = Math.round((pasivo + capital) * 100) / 100;
-            const ladoIzquierdo = Math.round(activo * 100) / 100;
-            const diferencia = Math.round(Math.abs(ladoIzquierdo - ladoDerecho) * 100) / 100;
-            const estaEnEquilibrio = (diferencia === 0);
+            // TOTAL ACTIVO
+            html += `<tr class="fw-bold fs-6">
+                <td></td>
+                <td class="text-end text-uppercase text-primary">TOTAL ACTIVO:</td>
+                <td></td>
+                <td class="text-end font-numeric text-primary linea-total-doble">${formatoNumero(totActivo)}</td>
+            </tr>`;
 
-            document.getElementById('lado-izq').textContent = formatoNumero(ladoIzquierdo);
-            document.getElementById('lado-der').textContent = formatoNumero(ladoDerecho);
-            document.getElementById('diferencia-balance').textContent = formatoNumero(diferencia);
-            document.getElementById('ecuacion-valores').textContent = `${formatoNumero(ladoIzquierdo)} = ${formatoNumero(pasivo)} + ${formatoNumero(capital)}`;
+            // Fila separadora
+            html += `<tr><td colspan="4" class="py-2 bg-light"></td></tr>`;
 
-            const banner = document.getElementById('banner-equilibrio');
-            const bannerIcono = document.getElementById('banner-icono');
-            const bannerTitulo = document.getElementById('banner-titulo');
-            const bannerDesc = document.getElementById('banner-descripcion');
-            const bannerBadge = document.getElementById('banner-badge');
+            // --- SECCIÓN: PASIVO ---
+            html += `<tr class="table-light"><td colspan="4" class="fw-bold text-uppercase text-dark"><i class="bi bi-credit-card-2-front me-1 text-danger"></i> PASIVO</td></tr>`;
 
-            if (estaEnEquilibrio) {
-                banner.className = 'alert alert-success d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm border-success';
-                bannerIcono.className = 'bi bi-shield-check fs-2 text-success';
-                bannerTitulo.textContent = '¡Ecuación Contable en Equilibrio!';
-                bannerDesc.textContent = `Activo (${formatoNumero(ladoIzquierdo)}) = Pasivo (${formatoNumero(pasivo)}) + Capital (${formatoNumero(capital)}). Balance cuadrado.`;
-                bannerBadge.className = 'badge bg-success fs-6 px-3 py-2';
-                bannerBadge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Balance Cuadrado';
+            // Pasivo Corriente
+            html += `<tr><td></td><td class="fw-bold text-secondary text-uppercase ps-3">PASIVO CORRIENTE / A CORTO PLAZO</td><td></td><td></td></tr>`;
+            if (cPasivoCorriente.length === 0) {
+                html += `<tr><td class="font-monospace text-muted ps-3">-</td><td class="fst-italic text-muted ps-4">Sin cuentas con movimientos</td><td class="text-end font-numeric text-muted">${formatoNumero(0)}</td><td></td></tr>`;
             } else {
-                banner.className = 'alert alert-danger d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm border-danger';
-                bannerIcono.className = 'bi bi-exclamation-triangle-fill fs-2 text-danger';
-                bannerTitulo.textContent = 'Descuadre en Balance General';
-                bannerDesc.textContent = `Diferencia de ${formatoNumero(diferencia)}. Revise los asientos registrados.`;
-                bannerBadge.className = 'badge bg-danger fs-6 px-3 py-2';
-                bannerBadge.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i> Descuadre';
+                cPasivoCorriente.forEach(c => {
+                    const saldo = calcSaldoCuenta(c, false);
+                    html += `<tr>
+                        <td class="font-monospace ps-3">${c.codigo || c.Codigo}</td>
+                        <td class="ps-4">${c.nombre || c.Nombre}</td>
+                        <td class="text-end font-numeric">${formatoNumero(saldo)}</td>
+                        <td></td>
+                    </tr>`;
+                });
+            }
+            html += `<tr class="fw-semibold">
+                <td></td>
+                <td class="text-end text-uppercase ps-3">Total Pasivo Corriente:</td>
+                <td></td>
+                <td class="text-end font-numeric linea-subtotal">${formatoNumero(totPasivoCorriente)}</td>
+            </tr>`;
+
+            // Pasivo No Corriente (si existe)
+            if (cPasivoNoCorriente.length > 0) {
+                html += `<tr><td></td><td class="fw-bold text-secondary text-uppercase ps-3">PASIVO NO CORRIENTE / A LARGO PLAZO</td><td></td><td></td></tr>`;
+                cPasivoNoCorriente.forEach(c => {
+                    const saldo = calcSaldoCuenta(c, false);
+                    html += `<tr>
+                        <td class="font-monospace ps-3">${c.codigo || c.Codigo}</td>
+                        <td class="ps-4">${c.nombre || c.Nombre}</td>
+                        <td class="text-end font-numeric">${formatoNumero(saldo)}</td>
+                        <td></td>
+                    </tr>`;
+                });
+                html += `<tr class="fw-semibold">
+                    <td></td>
+                    <td class="text-end text-uppercase ps-3">Total Pasivo No Corriente:</td>
+                    <td></td>
+                    <td class="text-end font-numeric linea-subtotal">${formatoNumero(totPasivoNoCorriente)}</td>
+                </tr>`;
+            }
+
+            // TOTAL PASIVO
+            html += `<tr class="fw-bold">
+                <td></td>
+                <td class="text-end text-uppercase text-secondary">TOTAL PASIVO:</td>
+                <td></td>
+                <td class="text-end font-numeric linea-subtotal">${formatoNumero(totPasivo)}</td>
+            </tr>`;
+
+            // Fila separadora
+            html += `<tr><td colspan="4" class="py-2 bg-light"></td></tr>`;
+
+            // --- SECCIÓN: CAPITAL CONTABLE ---
+            html += `<tr class="table-light"><td colspan="4" class="fw-bold text-uppercase text-dark"><i class="bi bi-bank me-1" style="color:#6d28d9;"></i> CAPITAL / PATRIMONIO CONTABLE</td></tr>`;
+
+            if (cCapital.length === 0) {
+                html += `<tr><td class="font-monospace ps-3">3101</td><td class="ps-4">Capital Social</td><td class="text-end font-numeric">${formatoNumero(0)}</td><td></td></tr>`;
+            } else {
+                cCapital.forEach(c => {
+                    const saldo = calcSaldoCuenta(c, false);
+                    html += `<tr>
+                        <td class="font-monospace ps-3">${c.codigo || c.Codigo}</td>
+                        <td class="ps-4">${c.nombre || c.Nombre}</td>
+                        <td class="text-end font-numeric">${formatoNumero(saldo)}</td>
+                        <td></td>
+                    </tr>`;
+                });
+            }
+
+            // Utilidad Neta del Ejercicio
+            const utilidadNom = utilidadNeta >= 0 ? 'Utilidad Neta del Ejercicio' : 'Pérdida Neta del Ejercicio';
+            const utilidadCod = utilidadNeta >= 0 ? '3201' : '3202';
+            html += `<tr>
+                <td class="font-monospace ps-3">${utilidadCod}</td>
+                <td class="ps-4">${utilidadNom}</td>
+                <td class="text-end font-numeric ${utilidadNeta < 0 ? 'text-danger' : ''}">${formatoNumero(utilidadNeta)}</td>
+                <td></td>
+            </tr>`;
+
+            // TOTAL CAPITAL CONTABLE
+            html += `<tr class="fw-semibold">
+                <td></td>
+                <td class="text-end text-uppercase ps-3">TOTAL CAPITAL CONTABLE:</td>
+                <td></td>
+                <td class="text-end font-numeric linea-subtotal">${formatoNumero(totCapital)}</td>
+            </tr>`;
+
+            // TOTAL PASIVO + CAPITAL CONTABLE
+            html += `<tr class="fw-bold fs-6">
+                <td></td>
+                <td class="text-end text-uppercase text-success">TOTAL PASIVO + CAPITAL CONTABLE:</td>
+                <td></td>
+                <td class="text-end font-numeric text-success linea-total-doble">${formatoNumero(totPasivoMasCapital)}</td>
+            </tr>`;
+
+            tbody.innerHTML = html;
+
+            // Renderizar Vista Resumida / Ejecutiva de Balance General
+            const elResActivo = document.getElementById('resumen-bal-activo');
+            if (elResActivo) elResActivo.textContent = formatoNumero(totActivo);
+            const elResSubActivo = document.getElementById('resumen-bal-subactivo');
+            if (elResSubActivo) elResSubActivo.textContent = `Corriente: ${formatoNumero(totActivoCorriente)} | No Cte: ${formatoNumero(totActivoNoCorriente)}`;
+
+            const elResPasivo = document.getElementById('resumen-bal-pasivo');
+            if (elResPasivo) elResPasivo.textContent = formatoNumero(totPasivo);
+            const elResSubPasivo = document.getElementById('resumen-bal-subpasivo');
+            if (elResSubPasivo) elResSubPasivo.textContent = `Corriente: ${formatoNumero(totPasivoCorriente)} | No Cte: ${formatoNumero(totPasivoNoCorriente)}`;
+
+            const elResCapital = document.getElementById('resumen-bal-capital');
+            if (elResCapital) elResCapital.textContent = formatoNumero(totCapital);
+            const elResSubCapital = document.getElementById('resumen-bal-subcapital');
+            if (elResSubCapital) elResSubCapital.textContent = `Social: ${formatoNumero(totCapitalSocial)} | Ejercicio: ${formatoNumero(utilidadNeta)}`;
+
+            const filaActivo = document.getElementById('resumen-fila-activo');
+            if (filaActivo) filaActivo.textContent = formatoNumero(totActivo);
+            const filaPasivo = document.getElementById('resumen-fila-pasivo');
+            if (filaPasivo) filaPasivo.textContent = formatoNumero(totPasivo);
+            const filaCapital = document.getElementById('resumen-fila-capital');
+            if (filaCapital) filaCapital.textContent = formatoNumero(totCapital);
+            const filaPasCap = document.getElementById('resumen-fila-pasivo-capital');
+            if (filaPasCap) filaPasCap.textContent = formatoNumero(totPasivoMasCapital);
+
+            const badgeResumenCuadre = document.getElementById('balance-resumen-cuadre-badge');
+            const txtResumenEcuacion = document.getElementById('balance-resumen-ecuacion-texto');
+            if (txtResumenEcuacion) {
+                txtResumenEcuacion.textContent = `ACTIVO (${formatoNumero(totActivo)}) = PASIVO (${formatoNumero(totPasivo)}) + CAPITAL (${formatoNumero(totCapital)})`;
+            }
+            if (badgeResumenCuadre) {
+                if (estaCuadrado) {
+                    badgeResumenCuadre.innerHTML = `<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6"><i class="bi bi-shield-check me-1"></i> Ecuación Contable Cuadrada: Activo = Pasivo + Capital</span>`;
+                } else {
+                    badgeResumenCuadre.innerHTML = `<span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 fs-6"><i class="bi bi-exclamation-triangle-fill me-1"></i> DESCUADRE: Diferencia ${formatoNumero(diferencia)}</span>`;
+                }
+            }
+
+            // Etiqueta de comprobación contable detallada
+            const badgeCuadre = document.getElementById('balance-cuadre-badge');
+            const txtEcuacion = document.getElementById('balance-ecuacion-texto');
+            if (txtEcuacion) {
+                txtEcuacion.textContent = `ACTIVO (${formatoNumero(totActivo)}) = PASIVO (${formatoNumero(totPasivo)}) + CAPITAL (${formatoNumero(totCapital)})`;
+            }
+            if (badgeCuadre) {
+                if (estaCuadrado) {
+                    badgeCuadre.innerHTML = `<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6"><i class="bi bi-shield-check me-1"></i> Ecuación Contable Cuadrada: Activo = Pasivo + Capital</span>`;
+                } else {
+                    badgeCuadre.innerHTML = `<span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 fs-6"><i class="bi bi-exclamation-triangle-fill me-1"></i> DESCUADRE CONTABLE: Diferencia ${formatoNumero(diferencia)}</span>`;
+                }
+            }
+        }
+
+        // Alternar vista resumida y detallada de Balance General
+        function alternarDetalleBalance() {
+            const vistaResumida = document.getElementById('balance-vista-resumida');
+            const vistaDetallada = document.getElementById('balance-vista-detallada');
+            const btn = document.getElementById('btn-toggle-detalle-balance');
+            const icono = document.getElementById('icono-toggle-balance');
+            const texto = document.getElementById('texto-toggle-balance');
+            if (!vistaResumida || !vistaDetallada) return;
+
+            const estaDetallada = !vistaDetallada.classList.contains('d-none');
+            if (estaDetallada) {
+                // Volver a resumida
+                vistaDetallada.classList.add('d-none');
+                vistaResumida.classList.remove('d-none');
+                if (icono) icono.className = 'bi bi-chevron-down';
+                if (texto) texto.textContent = 'Ver más (Detalle por Cuentas)';
+                if (btn) {
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-primary');
+                }
+            } else {
+                // Mostrar detallada
+                vistaResumida.classList.add('d-none');
+                vistaDetallada.classList.remove('d-none');
+                if (icono) icono.className = 'bi bi-chevron-up';
+                if (texto) texto.textContent = 'Ver menos (Vista Resumida)';
+                if (btn) {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-outline-primary');
+                }
             }
         }
 
         // 8.2 Estado de Resultados Integral
         async function cargarEstadoResultados() {
             try {
-                const res = await fetch('/api/reportes/estado-resultados' + obtenerQueryPeriodo());
+                const res = await fetchAutenticado('/api/reportes/estado-resultados' + obtenerQueryPeriodo());
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 state.estadoResultados = await res.json();
                 renderizarEstadoResultados();
@@ -3090,6 +4116,11 @@
             const tbody = document.getElementById('resultados-tbody');
             if (!tbody || !data) return;
 
+            // Período dinámico
+            const desc = obtenerDescripcionPeriodo(state.periodo?.tipo, state.periodo?.fecha, state.periodo?.fechaInicio, state.periodo?.fechaFin);
+            const subPeriodo = document.getElementById('resultados-subtitulo-periodo');
+            if (subPeriodo) subPeriodo.textContent = `Período: ${desc} | Expresado en Córdobas (C$)`;
+
             const ingresos = data.ingresos || [];
             const costos = data.costos || [];
             const gastos = data.gastos || [];
@@ -3100,61 +4131,51 @@
             const utilidadOperativa = data.utilidadOperativa ?? 0;
             const utilidadNeta = data.utilidadNeta ?? 0;
 
-            const badgeHead = document.getElementById('badge-utilidad-neta-head');
-            if (badgeHead) {
-                if (utilidadNeta >= 0) {
-                    badgeHead.className = 'badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6';
-                    badgeHead.innerHTML = `<i class="bi bi-graph-up-arrow me-1"></i> Utilidad Neta: ${formatoNumero(utilidadNeta)}`;
-                } else {
-                    badgeHead.className = 'badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 fs-6';
-                    badgeHead.innerHTML = `<i class="bi bi-graph-down-arrow me-1"></i> Pérdida Neta: ${formatoNumero(utilidadNeta)}`;
-                }
-            }
-
             let html = '';
 
             // 1. Ingresos
             html += `<tr class="table-light"><td colspan="4" class="fw-bold text-uppercase text-secondary"><i class="bi bi-arrow-down-right me-1"></i> 1. Ingresos de Operación</td></tr>`;
             if (ingresos.length === 0) {
-                html += `<tr><td class="font-monospace text-muted">-</td><td class="fst-italic text-muted">Sin ingresos registrados en el período</td><td class="text-end font-monospace text-muted">${formatoNumero(0)}</td><td></td></tr>`;
+                html += `<tr><td class="font-monospace text-muted">-</td><td class="fst-italic text-muted">Sin ingresos registrados en el período</td><td class="text-end font-numeric text-muted">${formatoNumero(0)}</td><td></td></tr>`;
             } else {
                 ingresos.forEach(i => {
-                    html += `<tr><td class="font-monospace fw-semibold text-primary">${i.codigo}</td><td>${i.nombre}</td><td class="text-end font-monospace">${formatoNumero(i.monto)}</td><td></td></tr>`;
+                    html += `<tr><td class="font-monospace fw-semibold text-primary">${i.codigo}</td><td>${i.nombre}</td><td class="text-end font-numeric">${formatoNumero(i.monto)}</td><td></td></tr>`;
                 });
             }
-            html += `<tr class="fw-bold bg-light"><td colspan="2" class="text-end text-uppercase">Total Ingresos Operativos:</td><td></td><td class="text-end font-monospace text-primary fs-6">${formatoNumero(totalIngresos)}</td></tr>`;
+            html += `<tr class="fw-bold"><td colspan="2" class="text-end text-uppercase">Total Ingresos Operativos:</td><td></td><td class="text-end font-numeric text-primary linea-subtotal">${formatoNumero(totalIngresos)}</td></tr>`;
 
             // 2. Costos
             html += `<tr class="table-light"><td colspan="4" class="fw-bold text-uppercase text-secondary"><i class="bi bi-arrow-up-right me-1"></i> 2. Costos de Operación / Ventas</td></tr>`;
             if (costos.length === 0) {
-                html += `<tr><td class="font-monospace text-muted">-</td><td class="fst-italic text-muted">Sin costos registrados en el período</td><td class="text-end font-monospace text-muted">${formatoNumero(0)}</td><td></td></tr>`;
+                html += `<tr><td class="font-monospace text-muted">-</td><td class="fst-italic text-muted">Sin costos registrados en el período</td><td class="text-end font-numeric text-muted">${formatoNumero(0)}</td><td></td></tr>`;
             } else {
                 costos.forEach(c => {
-                    html += `<tr><td class="font-monospace fw-semibold text-primary">${c.codigo}</td><td>${c.nombre}</td><td class="text-end font-monospace">${formatoNumero(c.monto)}</td><td></td></tr>`;
+                    html += `<tr><td class="font-monospace fw-semibold text-primary">${c.codigo}</td><td>${c.nombre}</td><td class="text-end font-numeric">${formatoNumero(c.monto)}</td><td></td></tr>`;
                 });
             }
-            html += `<tr class="fw-bold bg-light"><td colspan="2" class="text-end text-uppercase">Total Costos:</td><td></td><td class="text-end font-monospace text-danger fs-6">${formatoNumero(totalCostos)}</td></tr>`;
+            html += `<tr class="fw-bold"><td colspan="2" class="text-end text-uppercase">Total Costos:</td><td></td><td class="text-end font-numeric text-danger linea-subtotal">${formatoNumero(totalCostos)}</td></tr>`;
 
             // 3. Utilidad Bruta
-            html += `<tr class="table-primary fw-bold"><td colspan="2" class="text-end text-uppercase">(=) UTILIDAD BRUTA EN VENTAS:</td><td></td><td class="text-end font-monospace fs-6 ${utilidadBruta < 0 ? 'text-danger' : 'text-primary'}">${formatoNumero(utilidadBruta)}</td></tr>`;
+            html += `<tr class="table-primary fw-bold"><td colspan="2" class="text-end text-uppercase">(=) UTILIDAD BRUTA EN VENTAS:</td><td></td><td class="text-end font-numeric fs-6 ${utilidadBruta < 0 ? 'text-danger' : 'text-primary'}">${formatoNumero(utilidadBruta)}</td></tr>`;
 
             // 4. Gastos Operativos
             html += `<tr class="table-light"><td colspan="4" class="fw-bold text-uppercase text-secondary"><i class="bi bi-cash-stack me-1"></i> 3. Gastos de Operación (Administración y Ventas)</td></tr>`;
             if (gastos.length === 0) {
-                html += `<tr><td class="font-monospace text-muted">-</td><td class="fst-italic text-muted">Sin gastos de operación registrados</td><td class="text-end font-monospace text-muted">${formatoNumero(0)}</td><td></td></tr>`;
+                html += `<tr><td class="font-monospace text-muted">-</td><td class="fst-italic text-muted">Sin gastos de operación registrados</td><td class="text-end font-numeric text-muted">${formatoNumero(0)}</td><td></td></tr>`;
             } else {
                 gastos.forEach(g => {
-                    html += `<tr><td class="font-monospace fw-semibold text-primary">${g.codigo}</td><td>${g.nombre}</td><td class="text-end font-monospace">${formatoNumero(g.monto)}</td><td></td></tr>`;
+                    html += `<tr><td class="font-monospace fw-semibold text-primary">${g.codigo}</td><td>${g.nombre}</td><td class="text-end font-numeric">${formatoNumero(g.monto)}</td><td></td></tr>`;
                 });
             }
-            html += `<tr class="fw-bold bg-light"><td colspan="2" class="text-end text-uppercase">Total Gastos Operativos:</td><td></td><td class="text-end font-monospace text-danger fs-6">${formatoNumero(totalGastos)}</td></tr>`;
+            html += `<tr class="fw-bold"><td colspan="2" class="text-end text-uppercase">Total Gastos Operativos:</td><td></td><td class="text-end font-numeric text-danger linea-subtotal">${formatoNumero(totalGastos)}</td></tr>`;
 
             // 5. Utilidad Operativa
-            html += `<tr class="table-info fw-bold"><td colspan="2" class="text-end text-uppercase">(=) UTILIDAD DE OPERACIÓN:</td><td></td><td class="text-end font-monospace fs-6 ${utilidadOperativa < 0 ? 'text-danger' : 'text-primary'}">${formatoNumero(utilidadOperativa)}</td></tr>`;
+            html += `<tr class="table-info fw-bold"><td colspan="2" class="text-end text-uppercase">(=) UTILIDAD DE OPERACIÓN:</td><td></td><td class="text-end font-numeric fs-6 ${utilidadOperativa < 0 ? 'text-danger' : 'text-primary'}">${formatoNumero(utilidadOperativa)}</td></tr>`;
 
             // 6. Utilidad Neta
-            const claseFinal = utilidadNeta >= 0 ? 'table-success text-success' : 'table-danger text-danger';
-            html += `<tr class="${claseFinal} fw-bold fs-6"><td colspan="2" class="text-end text-uppercase">(=) ${utilidadNeta >= 0 ? 'UTILIDAD NETA DEL EJERCICIO' : 'PÉRDIDA NETA DEL EJERCICIO'}:</td><td></td><td class="text-end font-monospace">${formatoNumero(utilidadNeta)}</td></tr>`;
+            const labelFinal = utilidadNeta >= 0 ? '(=) UTILIDAD NETA DEL EJERCICIO:' : '(=) PÉRDIDA NETA DEL EJERCICIO:';
+            const colorFinal = utilidadNeta >= 0 ? 'text-success' : 'text-danger';
+            html += `<tr class="fw-bold fs-6"><td colspan="2" class="text-end text-uppercase ${colorFinal}">${labelFinal}</td><td></td><td class="text-end font-numeric ${colorFinal} linea-total-doble">${formatoNumero(utilidadNeta)}</td></tr>`;
 
             tbody.innerHTML = html;
         }
@@ -3162,7 +4183,7 @@
         // 8.3 Estado de Flujo de Efectivo
         async function cargarFlujoEfectivo() {
             try {
-                const res = await fetch('/api/reportes/flujo-efectivo' + obtenerQueryPeriodo());
+                const res = await fetchAutenticado('/api/reportes/flujo-efectivo' + obtenerQueryPeriodo());
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 state.flujo = await res.json();
                 renderizarFlujoEfectivo();
@@ -3174,6 +4195,11 @@
 
         function renderizarFlujoEfectivo() {
             if (!state.flujo) return;
+
+            // Período dinámico
+            const desc = obtenerDescripcionPeriodo(state.periodo?.tipo, state.periodo?.fecha, state.periodo?.fechaInicio, state.periodo?.fechaFin);
+            const subPeriodo = document.getElementById('flujo-subtitulo-periodo');
+            if (subPeriodo) subPeriodo.textContent = `Período: ${desc} | Expresado en Córdobas (C$)`;
 
             const totalEntradas = state.flujo.totalEntradas ?? state.flujo.TotalEntradas ?? 0;
             const totalSalidas = state.flujo.totalSalidas ?? state.flujo.TotalSalidas ?? 0;
@@ -3265,7 +4291,7 @@
         // 8.4 Estado de Variación en el Capital
         async function cargarVariacionCapital() {
             try {
-                const res = await fetch('/api/reportes/variacion-capital' + obtenerQueryPeriodo());
+                const res = await fetchAutenticado('/api/reportes/variacion-capital' + obtenerQueryPeriodo());
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 state.variacionCapital = await res.json();
                 renderizarVariacionCapital();
@@ -3301,1006 +4327,27 @@
             document.getElementById('tabla-cap-final').textContent = formatoNumero(final);
         }
 
-        // ========================================================
-        // 9. EXPORTACIÓN PROFESIONAL A EXCEL (.XLSX) CON FÓRMULAS VIVAS
-        // ========================================================
-        async function exportarTodoAExcel() {
-            const btn = document.getElementById('btn-exportar-excel');
-            const originalHtml = btn ? btn.innerHTML : '';
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Exportando...';
+        // Auto-inicialización y comprobación de sesión al cargar la página
+        window.addEventListener('DOMContentLoaded', () => {
+            const tokenGuardado = sessionStorage.getItem(KEY_TOKEN);
+            const userGuardado = sessionStorage.getItem(KEY_USER_DATA);
+
+            if (tokenGuardado && userGuardado) {
+                try {
+                    const userData = JSON.parse(userGuardado);
+                    const navUser = document.getElementById('nav-usuario-nombre');
+                    if (navUser) navUser.textContent = userData.nombreCompleto || userData.username || 'Administrador';
+                    document.getElementById('login-container').classList.add('d-none');
+                    document.getElementById('app-container').classList.remove('d-none');
+                    inicializarSistema();
+                } catch {
+                    cerrarSesionLocal();
+                }
+            } else {
+                cerrarSesionLocal();
             }
+        });
 
-            // 1. Declaración segura de tipo, fecha y descPeriodo en el ámbito raíz de la función
-            const tipoDetectado = document.getElementById('tipoPeriodo')?.value ||
-                                  document.querySelector('.select-periodo-global')?.value ||
-                                  window.estadoPeriodoActual?.tipo ||
-                                  window.periodoSeleccionado ||
-                                  state.periodo?.tipo ||
-                                  'todo';
-
-            const fechaDetectada = document.getElementById('fechaPeriodo')?.value ||
-                                   document.querySelector('.input-fecha-global')?.value ||
-                                   window.estadoPeriodoActual?.fecha ||
-                                   state.periodo?.fecha ||
-                                   new Date().toISOString().split('T')[0];
-
-            let descPeriodo = "Histórico Completo";
-            if (tipoDetectado === 'mes') descPeriodo = "Mes Actual";
-            else if (tipoDetectado === 'semestre') descPeriodo = "Semestre Actual";
-            else if (tipoDetectado === 'anio') descPeriodo = "Año Actual";
-            else if (tipoDetectado === 'personalizado') descPeriodo = `Período Personalizado (${fechaDetectada})`;
-
-            // Sincronizar en ventana y objeto global
-            window.descPeriodo = descPeriodo;
-            window.periodoTexto = descPeriodo;
-            if (typeof sincronizarBarrasPeriodo === 'function') {
-                sincronizarBarrasPeriodo(tipoDetectado, fechaDetectada);
-            }
-
-            try {
-                if (typeof XLSX === 'undefined') {
-                    throw new Error('La librería SheetJS (XLSX) no se encuentra cargada en la aplicación.');
-                }
-
-                // Sincronizar todos los datos para asegurar la mayor precisión con el período activo
-                await Promise.all([
-                    cargarCuentas(),
-                    cargarHistorialAsientos(),
-                    cargarLibroMayor(),
-                    cargarBalanzaComprobacion(),
-                    cargarBalanceGeneral(),
-                    cargarEstadoResultados(),
-                    cargarFlujoEfectivo(),
-                    cargarVariacionCapital()
-                ]);
-
-                const folioMap = obtenerMapaFolios();
-                const wb = XLSX.utils.book_new();
-                const FORMATO_MONEDA = '"C$" #,##0.00;[Red]-"C$" #,##0.00;"C$" 0.00';
-
-                // ====================================================
-                // HOJA 1: "Libro Diario"
-                // ====================================================
-                const aoaDiario = [
-                    ['SISTEMA CONTABLE WEB - LIBRO DIARIO CONTINENTAL GENERAL'],
-                    [`Período: ${descPeriodo} | Fecha de Generación: ${new Date().toLocaleString('es-ES')}`],
-                    [],
-                    ['Número de Asiento', 'Folio del Mayor', 'Fecha', 'Concepto / Cuentas', 'Parciales', 'Debe', 'Haber']
-                ];
-
-                const asientosOrdenados = [...(state.asientos || [])].sort((a, b) => (a.id || a.Id || 0) - (b.id || b.Id || 0));
-                let currentRowDiario = 4; // Fila de cabecera es la 4 (1-based)
-
-                if (asientosOrdenados.length === 0) {
-                    currentRowDiario++;
-                    aoaDiario.push(['-', '-', '-', 'Sin asientos registrados en el periodo', '-', { t: 'n', v: 0, z: FORMATO_MONEDA }, { t: 'n', v: 0, z: FORMATO_MONEDA }]);
-                } else {
-                    asientosOrdenados.forEach(a => {
-                        const id = a.id || a.Id;
-                        const fechaRaw = a.fecha || a.Fecha;
-                        const fechaStr = fechaRaw ? new Date(fechaRaw).toLocaleDateString('es-ES') : '';
-                        const glosa = a.concepto || a.Concepto || '';
-                        const lineas = a.lineas || a.Lineas || [];
-
-                        // Fila separadora con Fecha y número de asiento
-                        currentRowDiario++;
-                        aoaDiario.push(['', '', fechaStr, `ASIENTO NO. ${id}`, '', '', '']);
-
-                        const lineaStartRow = currentRowDiario + 1;
-
-                        lineas.forEach((l, idx) => {
-                            currentRowDiario++;
-                            const cod = l.codigoCuenta || l.CodigoCuenta || '';
-                            const nom = l.nombreCuenta || l.NombreCuenta || '';
-                            const debe = parseFloat(l.debe || l.Debe || 0);
-                            const haber = parseFloat(l.haber || l.Haber || 0);
-                            const esAcreditada = haber > 0 && debe === 0;
-
-                            let folio = folioMap[cod];
-                            let parcial = '';
-                            if (cod.includes('.') || cod.includes('-')) {
-                                const partes = cod.split(/[\.-]/);
-                                folio = folioMap[partes[0]] || folio || '-';
-                                parcial = partes.slice(1).join('.');
-                            } else {
-                                const cObj = state.todasLasCuentas.find(c => (c.codigo || c.Codigo) === cod);
-                                const pCod = cObj ? (cObj.cuentaPadreCodigo || cObj.CuentaPadreCodigo) : null;
-                                if (pCod && folioMap[pCod]) {
-                                    folio = folioMap[pCod];
-                                    parcial = cod.replace(pCod, '').replace(/^[-._]/, '') || cod;
-                                } else if (!folio) {
-                                    folio = '-';
-                                }
-                            }
-
-                            const cuentaTexto = esAcreditada ? `   a ${nom}` : nom;
-                            const celdaDebe = debe > 0 ? { t: 'n', v: debe, z: FORMATO_MONEDA } : '';
-                            const celdaHaber = haber > 0 ? { t: 'n', v: haber, z: FORMATO_MONEDA } : '';
-
-                            aoaDiario.push([
-                                idx === 0 ? id : '',
-                                folio,
-                                fechaStr,
-                                cuentaTexto,
-                                parcial,
-                                celdaDebe,
-                                celdaHaber
-                            ]);
-                        });
-
-                        const lineaEndRow = currentRowDiario;
-
-                        // Fila de Glosa explicativa
-                        currentRowDiario++;
-                        aoaDiario.push(['', '', '', `Glosa: ${glosa}`, '', '', '']);
-
-                        // Fila de Sumas Iguales con fórmula viva: =SUM(...)
-                        currentRowDiario++;
-                        aoaDiario.push([
-                            '',
-                            '',
-                            '',
-                            `Sumas Iguales Asiento #${id}:`,
-                            '',
-                            { t: 'n', f: `SUM(F${lineaStartRow}:F${lineaEndRow})`, z: FORMATO_MONEDA },
-                            { t: 'n', f: `SUM(G${lineaStartRow}:G${lineaEndRow})`, z: FORMATO_MONEDA }
-                        ]);
-
-                        // Separador en blanco
-                        currentRowDiario++;
-                        aoaDiario.push([]);
-                    });
-                }
-
-                const wsDiario = XLSX.utils.aoa_to_sheet(aoaDiario);
-                wsDiario['!cols'] = [
-                    { wch: 18 },
-                    { wch: 15 },
-                    { wch: 14 },
-                    { wch: 45 },
-                    { wch: 14 },
-                    { wch: 18 },
-                    { wch: 18 }
-                ];
-                XLSX.utils.book_append_sheet(wb, wsDiario, 'Libro Diario');
-
-                // ====================================================
-                // HOJA 2: "Libro Mayor"
-                // ====================================================
-                const aoaMayor = [
-                    ['SISTEMA CONTABLE WEB - LIBRO MAYOR FORMAL (TABLA 24)'],
-                    [`Período: ${descPeriodo} | Fecha de Generación: ${new Date().toLocaleString('es-ES')}`],
-                    []
-                ];
-
-                const movsPorCuenta = {};
-                const asientosCronologicos = [...(state.asientos || [])].sort((a, b) => {
-                    const fA = new Date(a.fecha || a.Fecha || 0).getTime();
-                    const fB = new Date(b.fecha || b.Fecha || 0).getTime();
-                    return fA !== fB ? fA - fB : (a.id || a.Id || 0) - (b.id || b.Id || 0);
-                });
-
-                asientosCronologicos.forEach(asiento => {
-                    const asientoId = asiento.id || asiento.Id;
-                    const fecha = asiento.fecha || asiento.Fecha;
-                    const concepto = asiento.concepto || asiento.Concepto || `Asiento #${asientoId}`;
-                    (asiento.lineas || asiento.Lineas || []).forEach(l => {
-                        const cod = l.codigoCuenta || l.CodigoCuenta;
-                        if (!movsPorCuenta[cod]) movsPorCuenta[cod] = [];
-                        movsPorCuenta[cod].push({
-                            asientoId,
-                            fecha,
-                            concepto,
-                            debe: parseFloat(l.debe || l.Debe || 0),
-                            haber: parseFloat(l.haber || l.Haber || 0)
-                        });
-                    });
-                });
-
-                let currentRowMayor = 3;
-                const cuentasMayor = [...(state.mayor || [])];
-
-                if (cuentasMayor.length === 0) {
-                    currentRowMayor++;
-                    aoaMayor.push(['Sin movimientos registrados en el Libro Mayor']);
-                } else {
-                    cuentasMayor.forEach((cuenta, idx) => {
-                        const codigo = cuenta.codigo || cuenta.Codigo;
-                        const nombre = cuenta.nombre || cuenta.Nombre;
-                        const tipo = cuenta.tipo || cuenta.Tipo;
-                        const naturaleza = cuenta.naturaleza || cuenta.Naturaleza;
-                        const esDeudora = (naturaleza || '').toString().toLowerCase().includes('deudora');
-                        const folio = folioMap[codigo] || (idx + 1);
-                        const movs = movsPorCuenta[codigo] || [];
-
-                        currentRowMayor++;
-                        aoaMayor.push([`CUENTA: [${codigo}] ${nombre}`, '', '', '', `FOLIO NO. ${folio}`]);
-                        currentRowMayor++;
-                        aoaMayor.push([`Clasificación: ${tipo}`, `Naturaleza: ${naturaleza}`, '', '', '']);
-                        currentRowMayor++;
-                        aoaMayor.push(['Fecha', 'Concepto / Referencia', 'Cargos (Debe)', 'Abonos (Haber)', `Saldo Acumulado (${naturaleza})`]);
-
-                        const startMovRow = currentRowMayor + 1;
-
-                        if (movs.length === 0) {
-                            currentRowMayor++;
-                            aoaMayor.push(['-', 'Sin movimientos registrados en el periodo', { t: 'n', v: 0, z: FORMATO_MONEDA }, { t: 'n', v: 0, z: FORMATO_MONEDA }, { t: 'n', v: 0, z: FORMATO_MONEDA }]);
-                            const endMovRow = currentRowMayor;
-                            currentRowMayor++;
-                            aoaMayor.push([
-                                '',
-                                'TOTALES Y SALDO FINAL:',
-                                { t: 'n', f: `SUM(C${startMovRow}:C${endMovRow})`, z: FORMATO_MONEDA },
-                                { t: 'n', f: `SUM(D${startMovRow}:D${endMovRow})`, z: FORMATO_MONEDA },
-                                { t: 'n', f: `E${endMovRow}`, z: FORMATO_MONEDA }
-                            ]);
-                        } else {
-                            movs.forEach((m, mIdx) => {
-                                currentRowMayor++;
-                                const rowActual = currentRowMayor;
-                                const fechaStr = m.fecha ? new Date(m.fecha).toLocaleDateString('es-ES') : '-';
-                                const conceptoRef = `${m.concepto} (As.#${m.asientoId})`;
-                                const d = m.debe;
-                                const h = m.haber;
-
-                                let formulaSaldo = '';
-                                if (mIdx === 0) {
-                                    formulaSaldo = esDeudora ? `C${rowActual}-D${rowActual}` : `D${rowActual}-C${rowActual}`;
-                                } else {
-                                    const rowPrev = rowActual - 1;
-                                    formulaSaldo = esDeudora ? `E${rowPrev}+C${rowActual}-D${rowActual}` : `E${rowPrev}+D${rowActual}-C${rowActual}`;
-                                }
-
-                                aoaMayor.push([
-                                    fechaStr,
-                                    conceptoRef,
-                                    { t: 'n', v: d, z: FORMATO_MONEDA },
-                                    { t: 'n', v: h, z: FORMATO_MONEDA },
-                                    { t: 'n', f: formulaSaldo, z: FORMATO_MONEDA }
-                                ]);
-                            });
-
-                            const endMovRow = currentRowMayor;
-                            currentRowMayor++;
-                            aoaMayor.push([
-                                '',
-                                'TOTALES Y SALDO FINAL:',
-                                { t: 'n', f: `SUM(C${startMovRow}:C${endMovRow})`, z: FORMATO_MONEDA },
-                                { t: 'n', f: `SUM(D${startMovRow}:D${endMovRow})`, z: FORMATO_MONEDA },
-                                { t: 'n', f: `E${endMovRow}`, z: FORMATO_MONEDA }
-                            ]);
-                        }
-
-                        currentRowMayor += 2;
-                        aoaMayor.push([]);
-                        aoaMayor.push([]);
-                    });
-                }
-
-                const wsMayor = XLSX.utils.aoa_to_sheet(aoaMayor);
-                wsMayor['!cols'] = [
-                    { wch: 15 },
-                    { wch: 42 },
-                    { wch: 18 },
-                    { wch: 18 },
-                    { wch: 22 }
-                ];
-                XLSX.utils.book_append_sheet(wb, wsMayor, 'Libro Mayor');
-
-                // ====================================================
-                // HOJA 3: "Balanza de Comprobación"
-                // ====================================================
-                const aoaBalanza = [
-                    ['SISTEMA CONTABLE WEB - BALANZA DE COMPROBACIÓN'],
-                    [`Período: ${descPeriodo} | Fecha de Generación: ${new Date().toLocaleString('es-ES')}`],
-                    [],
-                    ['Código', 'Nombre de la Cuenta', 'Movimiento Debe', 'Movimiento Haber', 'Saldo Deudor', 'Saldo Acreedor']
-                ];
-
-                const filasBalanza = (state.balanza && (state.balanza.cuentas || state.balanza.filas || state.balanza.Filas)) || [];
-                const startRowBalanza = 5;
-                let currentRowBalanza = 4;
-
-                if (filasBalanza.length === 0) {
-                    currentRowBalanza++;
-                    aoaBalanza.push(['-', 'Sin movimientos contables para balanza', { t: 'n', v: 0, z: FORMATO_MONEDA }, { t: 'n', v: 0, z: FORMATO_MONEDA }, { t: 'n', v: 0, z: FORMATO_MONEDA }, { t: 'n', v: 0, z: FORMATO_MONEDA }]);
-                } else {
-                    filasBalanza.forEach(b => {
-                        currentRowBalanza++;
-                        const r = currentRowBalanza;
-                        const cod = b.codigo || b.Codigo;
-                        const nom = b.nombre || b.Nombre;
-                        const debe = parseFloat(b.totalDebe ?? b.TotalDebe ?? 0);
-                        const haber = parseFloat(b.totalHaber ?? b.TotalHaber ?? 0);
-
-                        aoaBalanza.push([
-                            cod,
-                            nom,
-                            { t: 'n', v: debe, z: FORMATO_MONEDA },
-                            { t: 'n', v: haber, z: FORMATO_MONEDA },
-                            { t: 'n', f: `IF(C${r}>D${r},C${r}-D${r},0)`, z: FORMATO_MONEDA },
-                            { t: 'n', f: `IF(D${r}>C${r},D${r}-C${r},0)`, z: FORMATO_MONEDA }
-                        ]);
-                    });
-                }
-
-                const endRowBalanza = currentRowBalanza;
-                const totalRowBalanza = endRowBalanza + 1;
-
-                aoaBalanza.push([
-                    '',
-                    'SUMAS TOTALES:',
-                    { t: 'n', f: `SUM(C${startRowBalanza}:C${endRowBalanza})`, z: FORMATO_MONEDA },
-                    { t: 'n', f: `SUM(D${startRowBalanza}:D${endRowBalanza})`, z: FORMATO_MONEDA },
-                    { t: 'n', f: `SUM(E${startRowBalanza}:E${endRowBalanza})`, z: FORMATO_MONEDA },
-                    { t: 'n', f: `SUM(F${startRowBalanza}:F${endRowBalanza})`, z: FORMATO_MONEDA }
-                ]);
-
-                aoaBalanza.push([
-                    '',
-                    'COMPROBACIÓN DE CUADRE (DEUDOR - ACREEDOR):',
-                    '',
-                    '',
-                    { t: 'n', f: `E${totalRowBalanza}-F${totalRowBalanza}`, z: FORMATO_MONEDA },
-                    { t: 's', f: `IF(ROUND(E${totalRowBalanza}-F${totalRowBalanza},2)=0,"BALANZA CUADRADA","DESCUADRADA")` }
-                ]);
-
-                const wsBalanza = XLSX.utils.aoa_to_sheet(aoaBalanza);
-                wsBalanza['!cols'] = [
-                    { wch: 15 },
-                    { wch: 42 },
-                    { wch: 18 },
-                    { wch: 18 },
-                    { wch: 18 },
-                    { wch: 18 }
-                ];
-                XLSX.utils.book_append_sheet(wb, wsBalanza, 'Balanza de Comprobación');
-
-                // Clasificación analítica de cuentas para Estados Financieros
-                // Solo incluir cuentas que tengan movimientos o saldo diferente de cero en el período
-                const cuentasBase = (state.mayor && state.mayor.length > 0)
-                    ? state.mayor
-                    : (state.balanza && (state.balanza.cuentas || state.balanza.filas || state.balanza.Filas) || []);
-
-                const obtenerSaldoNeto = (cuenta, deudoraPorDefecto) => {
-                    const debe = parseFloat(cuenta.totalDebe ?? cuenta.TotalDebe ?? 0);
-                    const haber = parseFloat(cuenta.totalHaber ?? cuenta.TotalHaber ?? 0);
-                    return deudoraPorDefecto ? (debe - haber) : (haber - debe);
-                };
-
-                // Filtrar estrictamente cuentas con movimientos o saldo != 0
-                const cuentasConSaldo = cuentasBase.filter(c => {
-                    const debe = parseFloat(c.totalDebe ?? c.TotalDebe ?? 0);
-                    const haber = parseFloat(c.totalHaber ?? c.TotalHaber ?? 0);
-                    const saldoD = parseFloat(c.saldoDeudor ?? c.SaldoDeudor ?? 0);
-                    const saldoA = parseFloat(c.saldoAcreedor ?? c.SaldoAcreedor ?? 0);
-                    return Math.abs(debe) > 0.0001 || Math.abs(haber) > 0.0001 || Math.abs(saldoD) > 0.0001 || Math.abs(saldoA) > 0.0001;
-                });
-
-                // Identificar cuentas por bloques contables
-                const cIngresos = cuentasConSaldo.filter(c => {
-                    const tipo = (c.tipo || c.Tipo || '').toString().toLowerCase();
-                    const cod = (c.codigo || c.Codigo || '').toString();
-                    return tipo.includes('ingreso') || cod.startsWith('4');
-                });
-
-                const cCostos = cuentasConSaldo.filter(c => {
-                    const tipo = (c.tipo || c.Tipo || '').toString().toLowerCase();
-                    const cod = (c.codigo || c.Codigo || '').toString();
-                    return tipo.includes('costo') || cod.startsWith('5');
-                });
-
-                const cGastos = cuentasConSaldo.filter(c => {
-                    const tipo = (c.tipo || c.Tipo || '').toString().toLowerCase();
-                    const cod = (c.codigo || c.Codigo || '').toString();
-                    return tipo.includes('gasto') || cod.startsWith('6');
-                });
-
-                // Activos: 11 corriente / circulante vs 12/13 no corriente
-                const cActivos = cuentasConSaldo.filter(c => {
-                    const tipo = (c.tipo || c.Tipo || '').toString().toLowerCase();
-                    const cod = (c.codigo || c.Codigo || '').toString();
-                    return tipo.includes('activo') || cod.startsWith('1');
-                });
-
-                const cActivoCorriente = cActivos.filter(c => {
-                    const cod = (c.codigo || c.Codigo || '').toString();
-                    return cod.startsWith('11') || (!cod.startsWith('12') && !cod.startsWith('13'));
-                });
-
-                const cActivoNoCorriente = cActivos.filter(c => {
-                    const cod = (c.codigo || c.Codigo || '').toString();
-                    return cod.startsWith('12') || cod.startsWith('13');
-                });
-
-                // Pasivos: 21 corriente vs 22/23 no corriente
-                const cPasivos = cuentasConSaldo.filter(c => {
-                    const tipo = (c.tipo || c.Tipo || '').toString().toLowerCase();
-                    const cod = (c.codigo || c.Codigo || '').toString();
-                    return tipo.includes('pasivo') || cod.startsWith('2');
-                });
-
-                const cPasivoCorriente = cPasivos.filter(c => {
-                    const cod = (c.codigo || c.Codigo || '').toString();
-                    return cod.startsWith('21') || (!cod.startsWith('22') && !cod.startsWith('23'));
-                });
-
-                const cPasivoNoCorriente = cPasivos.filter(c => {
-                    const cod = (c.codigo || c.Codigo || '').toString();
-                    return cod.startsWith('22') || cod.startsWith('23');
-                });
-
-                // Capital
-                const cCapital = cuentasConSaldo.filter(c => {
-                    const tipo = (c.tipo || c.Tipo || '').toString().toLowerCase();
-                    const cod = (c.codigo || c.Codigo || '').toString();
-                    return tipo.includes('capital') || cod.startsWith('3');
-                });
-
-                // Función técnica para SheetJS: asegura tipo numérico 'n', valor 'v', formato contable 'z' y fórmula 'f'
-                function crearCeldaNumero(valor, formula = null) {
-                    const celda = { t: 'n', v: Number(valor) || 0, z: '"C$"#,##0.00' };
-                    if (formula) celda.f = formula;
-                    return celda;
-                }
-
-                // ====================================================
-                // HOJA 5: "Estado de Resultados" (Se genera antes para coordinar celda de Utilidad)
-                // ====================================================
-                const aoaResultados = [
-                    ['SISTEMA CONTABLE WEB - EMPRESA COMERCIAL'],
-                    ['ESTADO DE RESULTADOS INTEGRAL'],
-                    [`Período: ${descPeriodo} | Fecha de Generación: ${new Date().toLocaleDateString('es-ES')}`],
-                    [],
-                    ['Código', 'Concepto / Cuentas', 'Subtotales (C$)', 'Totales del Rubro (C$)']
-                ];
-
-                let rowRes = aoaResultados.length; // Fila 5 es la cabecera (1-based en Excel)
-                let valTotalIngresos = 0;
-                let valTotalCostos = 0;
-                let valTotalGastos = 0;
-
-                // 1. Bloque Ingresos
-                rowRes++;
-                aoaResultados.push(['', 'INGRESOS DE OPERACIÓN', '', '']);
-                const startIngresosRow = rowRes + 1;
-
-                if (cIngresos.length === 0) {
-                    rowRes++;
-                    aoaResultados.push(['-', 'Sin ingresos en el período', crearCeldaNumero(0), '']);
-                } else {
-                    cIngresos.forEach(c => {
-                        rowRes++;
-                        const cod = c.codigo || c.Codigo;
-                        const nom = c.nombre || c.Nombre;
-                        const saldo = Math.abs(obtenerSaldoNeto(c, false));
-                        valTotalIngresos += saldo;
-                        aoaResultados.push([cod, nom, crearCeldaNumero(saldo), '']);
-                    });
-                }
-                const endIngresosRow = rowRes;
-
-                rowRes++;
-                const rowTotalIngresos = rowRes;
-                aoaResultados.push([
-                    '',
-                    'TOTAL INGRESOS OPERATIVOS',
-                    '',
-                    crearCeldaNumero(valTotalIngresos, `SUM(C${startIngresosRow}:C${endIngresosRow})`)
-                ]);
-
-                // 2. Bloque Costos
-                rowRes++;
-                aoaResultados.push([]);
-                rowRes++;
-                aoaResultados.push(['', 'COSTO DE VENTAS / COSTOS OPERATIVOS', '', '']);
-                const startCostosRow = rowRes + 1;
-
-                if (cCostos.length === 0) {
-                    rowRes++;
-                    aoaResultados.push(['-', 'Sin costos en el período', crearCeldaNumero(0), '']);
-                } else {
-                    cCostos.forEach(c => {
-                        rowRes++;
-                        const cod = c.codigo || c.Codigo;
-                        const nom = c.nombre || c.Nombre;
-                        const saldo = Math.abs(obtenerSaldoNeto(c, true));
-                        valTotalCostos += saldo;
-                        aoaResultados.push([cod, nom, crearCeldaNumero(saldo), '']);
-                    });
-                }
-                const endCostosRow = rowRes;
-
-                rowRes++;
-                const rowTotalCostos = rowRes;
-                aoaResultados.push([
-                    '',
-                    'TOTAL COSTOS',
-                    '',
-                    crearCeldaNumero(valTotalCostos, `SUM(C${startCostosRow}:C${endCostosRow})`)
-                ]);
-
-                // 3. Utilidad Bruta
-                rowRes++;
-                const rowUtilidadBruta = rowRes;
-                const valUtilidadBruta = valTotalIngresos - valTotalCostos;
-                aoaResultados.push([
-                    '',
-                    'UTILIDAD BRUTA EN VENTAS',
-                    '',
-                    crearCeldaNumero(valUtilidadBruta, `D${rowTotalIngresos}-D${rowTotalCostos}`)
-                ]);
-
-                // 4. Bloque Gastos Operativos
-                rowRes++;
-                aoaResultados.push([]);
-                rowRes++;
-                aoaResultados.push(['', 'GASTOS DE OPERACIÓN (ADMINISTRACIÓN Y VENTAS)', '', '']);
-                const startGastosRow = rowRes + 1;
-
-                if (cGastos.length === 0) {
-                    rowRes++;
-                    aoaResultados.push(['-', 'Sin gastos de operación en el período', crearCeldaNumero(0), '']);
-                } else {
-                    cGastos.forEach(c => {
-                        rowRes++;
-                        const cod = c.codigo || c.Codigo;
-                        const nom = c.nombre || c.Nombre;
-                        const saldo = Math.abs(obtenerSaldoNeto(c, true));
-                        valTotalGastos += saldo;
-                        aoaResultados.push([cod, nom, crearCeldaNumero(saldo), '']);
-                    });
-                }
-                const endGastosRow = rowRes;
-
-                rowRes++;
-                const rowTotalGastos = rowRes;
-                aoaResultados.push([
-                    '',
-                    'TOTAL GASTOS OPERATIVOS',
-                    '',
-                    crearCeldaNumero(valTotalGastos, `SUM(C${startGastosRow}:C${endGastosRow})`)
-                ]);
-
-                // 5. Utilidad Operativa
-                rowRes++;
-                const rowUtilidadOperativa = rowRes;
-                const valUtilidadOperativa = valUtilidadBruta - valTotalGastos;
-                aoaResultados.push([
-                    '',
-                    'UTILIDAD DE OPERACIÓN',
-                    '',
-                    crearCeldaNumero(valUtilidadOperativa, `D${rowUtilidadBruta}-D${rowTotalGastos}`)
-                ]);
-
-                // 6. Utilidad / Pérdida Neta del Ejercicio
-                rowRes++;
-                aoaResultados.push([]);
-                rowRes++;
-                const rowUtilidadNeta = rowRes;
-                const valUtilidadNetaResultados = valUtilidadOperativa;
-                aoaResultados.push([
-                    '',
-                    '(=) UTILIDAD / PÉRDIDA NETA DEL EJERCICIO',
-                    '',
-                    crearCeldaNumero(valUtilidadNetaResultados, `D${rowUtilidadOperativa}`)
-                ]);
-
-                const wsResultados = XLSX.utils.aoa_to_sheet(aoaResultados);
-                wsResultados['!cols'] = [
-                    { wch: 15 },
-                    { wch: 45 },
-                    { wch: 22 },
-                    { wch: 24 }
-                ];
-
-                // ====================================================
-                // HOJA 4: "Balance General" (Estructura formal con precalculado 'v' y fórmulas 'f')
-                // ====================================================
-                const aoaBalance = [
-                    ['SISTEMA CONTABLE WEB - EMPRESA COMERCIAL'],
-                    ['BALANCE GENERAL CLASIFICADO'],
-                    [`Período: ${descPeriodo} | Fecha de Cierre: ${new Date().toLocaleDateString('es-ES')}`],
-                    [],
-                    ['Código', 'Clasificación / Cuentas', 'Importe Parcial (C$)', 'Totales de Rubro (C$)', 'Estado de Cuadre']
-                ];
-
-                let rowBal = aoaBalance.length; // Fila 5 es la cabecera (1-based en Excel)
-
-                // --- SECCIÓN ACTIVO ---
-                rowBal++;
-                aoaBalance.push(['', 'ACTIVO', '', '', '']);
-
-                // 1. Activo Corriente
-                rowBal++;
-                aoaBalance.push(['', 'ACTIVO CORRIENTE / CIRCULANTE', '', '', '']);
-
-                let filaTotalAC = null;
-                let valTotalAC = 0;
-                if (cActivoCorriente.length === 0) {
-                    rowBal++;
-                    filaTotalAC = rowBal;
-                    valTotalAC = 0;
-                    aoaBalance.push(['', 'Total Activo Corriente', '', crearCeldaNumero(0, '0'), '']);
-                } else {
-                    const filaInicioAC = rowBal + 1;
-                    cActivoCorriente.forEach(c => {
-                        rowBal++;
-                        const cod = c.codigo || c.Codigo;
-                        const nom = c.nombre || c.Nombre;
-                        const saldo = Math.abs(obtenerSaldoNeto(c, true));
-                        valTotalAC += saldo;
-                        aoaBalance.push([cod, nom, crearCeldaNumero(saldo), '', '']);
-                    });
-                    const filaFinAC = rowBal;
-
-                    rowBal++;
-                    filaTotalAC = rowBal;
-                    aoaBalance.push([
-                        '',
-                        'Total Activo Corriente',
-                        '',
-                        crearCeldaNumero(valTotalAC, `SUM(C${filaInicioAC}:C${filaFinAC})`),
-                        ''
-                    ]);
-                }
-
-                // 2. Activo No Corriente (solo si contiene cuentas activas)
-                let filaTotalANC = null;
-                let valTotalANC = 0;
-                if (cActivoNoCorriente.length > 0) {
-                    rowBal++;
-                    aoaBalance.push([]);
-                    rowBal++;
-                    aoaBalance.push(['', 'ACTIVO NO CORRIENTE / FIJO', '', '', '']);
-                    const filaInicioANC = rowBal + 1;
-                    cActivoNoCorriente.forEach(c => {
-                        rowBal++;
-                        const cod = c.codigo || c.Codigo;
-                        const nom = c.nombre || c.Nombre;
-                        const saldo = Math.abs(obtenerSaldoNeto(c, true));
-                        valTotalANC += saldo;
-                        aoaBalance.push([cod, nom, crearCeldaNumero(saldo), '', '']);
-                    });
-                    const filaFinANC = rowBal;
-
-                    rowBal++;
-                    filaTotalANC = rowBal;
-                    aoaBalance.push([
-                        '',
-                        'Total Activo No Corriente',
-                        '',
-                        crearCeldaNumero(valTotalANC, `SUM(C${filaInicioANC}:C${filaFinANC})`),
-                        ''
-                    ]);
-                }
-
-                // TOTAL ACTIVO (Fila de cierre de activo)
-                rowBal++;
-                const filaTotActivo = rowBal;
-                const totActivo = valTotalAC + valTotalANC;
-                const formulaTotActivo = filaTotalANC ? `D${filaTotalAC}+D${filaTotalANC}` : `D${filaTotalAC}`;
-                aoaBalance.push([
-                    '',
-                    'TOTAL ACTIVO',
-                    '',
-                    crearCeldaNumero(totActivo, formulaTotActivo),
-                    ''
-                ]);
-
-                // --- SECCIÓN PASIVO ---
-                rowBal++;
-                aoaBalance.push([]);
-                rowBal++;
-                aoaBalance.push(['', 'PASIVO', '', '', '']);
-
-                // 1. Pasivo Corriente
-                rowBal++;
-                aoaBalance.push(['', 'PASIVO CORRIENTE / A CORTO PLAZO', '', '', '']);
-
-                let filaTotalPC = null;
-                let valTotalPC = 0;
-                if (cPasivoCorriente.length === 0) {
-                    rowBal++;
-                    filaTotalPC = rowBal;
-                    valTotalPC = 0;
-                    aoaBalance.push(['', 'Total Pasivo Corriente', '', crearCeldaNumero(0, '0'), '']);
-                } else {
-                    const filaInicioPC = rowBal + 1;
-                    cPasivoCorriente.forEach(c => {
-                        rowBal++;
-                        const cod = c.codigo || c.Codigo;
-                        const nom = c.nombre || c.Nombre;
-                        const saldo = Math.abs(obtenerSaldoNeto(c, false));
-                        valTotalPC += saldo;
-                        aoaBalance.push([cod, nom, crearCeldaNumero(saldo), '', '']);
-                    });
-                    const filaFinPC = rowBal;
-
-                    rowBal++;
-                    filaTotalPC = rowBal;
-                    aoaBalance.push([
-                        '',
-                        'Total Pasivo Corriente',
-                        '',
-                        crearCeldaNumero(valTotalPC, `SUM(C${filaInicioPC}:C${filaFinPC})`),
-                        ''
-                    ]);
-                }
-
-                // 2. Pasivo No Corriente (solo si contiene cuentas activas)
-                let filaTotalPNC = null;
-                let valTotalPNC = 0;
-                if (cPasivoNoCorriente.length > 0) {
-                    rowBal++;
-                    aoaBalance.push([]);
-                    rowBal++;
-                    aoaBalance.push(['', 'PASIVO NO CORRIENTE / A LARGO PLAZO', '', '', '']);
-                    const filaInicioPNC = rowBal + 1;
-                    cPasivoNoCorriente.forEach(c => {
-                        rowBal++;
-                        const cod = c.codigo || c.Codigo;
-                        const nom = c.nombre || c.Nombre;
-                        const saldo = Math.abs(obtenerSaldoNeto(c, false));
-                        valTotalPNC += saldo;
-                        aoaBalance.push([cod, nom, crearCeldaNumero(saldo), '', '']);
-                    });
-                    const filaFinPNC = rowBal;
-
-                    rowBal++;
-                    filaTotalPNC = rowBal;
-                    aoaBalance.push([
-                        '',
-                        'Total Pasivo No Corriente',
-                        '',
-                        crearCeldaNumero(valTotalPNC, `SUM(C${filaInicioPNC}:C${filaFinPNC})`),
-                        ''
-                    ]);
-                }
-
-                // TOTAL PASIVO (Columna D)
-                rowBal++;
-                const filaTotPasivo = rowBal;
-                const totPasivo = valTotalPC + valTotalPNC;
-                const formulaTotPasivo = filaTotalPNC ? `D${filaTotalPC}+D${filaTotalPNC}` : `D${filaTotalPC}`;
-                aoaBalance.push([
-                    '',
-                    'TOTAL PASIVO',
-                    '',
-                    crearCeldaNumero(totPasivo, formulaTotPasivo),
-                    ''
-                ]);
-
-                // --- SECCIÓN CAPITAL / PATRIMONIO CONTABLE ---
-                rowBal++;
-                aoaBalance.push([]);
-                rowBal++;
-                aoaBalance.push(['', 'CAPITAL / PATRIMONIO CONTABLE', '', '', '']);
-                const filaIniCap = rowBal + 1;
-                let totCapital = 0;
-
-                if (cCapital.length === 0) {
-                    rowBal++;
-                    aoaBalance.push(['3101', 'Capital Social Aportado', crearCeldaNumero(0), '', '']);
-                } else {
-                    cCapital.forEach(c => {
-                        rowBal++;
-                        const cod = c.codigo || c.Codigo;
-                        const nom = c.nombre || c.Nombre;
-                        const saldo = Math.abs(obtenerSaldoNeto(c, false));
-                        totCapital += saldo;
-                        aoaBalance.push([cod, nom, crearCeldaNumero(saldo), '', '']);
-                    });
-                }
-
-                // Fila Utilidad Neta del Ejercicio vinculada por fórmula viva a la Hoja "Estado de Resultados"
-                rowBal++;
-                const valUtilidadNeta = (valTotalIngresos - valTotalCostos - valTotalGastos);
-                totCapital += valUtilidadNeta;
-                aoaBalance.push([
-                    '3201',
-                    'Utilidad Neta del Ejercicio',
-                    crearCeldaNumero(valUtilidadNeta, `'Estado de Resultados'!D${rowUtilidadNeta}`),
-                    '',
-                    ''
-                ]);
-                const filaFinCap = rowBal;
-
-                // TOTAL CAPITAL CONTABLE
-                rowBal++;
-                const filaTotCapital = rowBal;
-                aoaBalance.push([
-                    '',
-                    'TOTAL CAPITAL CONTABLE',
-                    '',
-                    crearCeldaNumero(totCapital, `SUM(C${filaIniCap}:C${filaFinCap})`),
-                    ''
-                ]);
-
-                // TOTAL PASIVO + CAPITAL CONTABLE (Fila final de cierre con estado en Columna E)
-                rowBal++;
-                const filaCierre = rowBal;
-                const totPasivoCapital = totPasivo + totCapital;
-                const esCuadrado = Math.abs(totActivo - totPasivoCapital) < 0.01;
-                const estadoCuadreTexto = esCuadrado
-                    ? "ECUACIÓN CUADRADA: ACTIVO = PASIVO + CAPITAL"
-                    : "DESCUADRE CONTABLE";
-
-                aoaBalance.push([
-                    '',
-                    'TOTAL PASIVO + CAPITAL CONTABLE',
-                    '',
-                    crearCeldaNumero(totPasivoCapital, `D${filaTotPasivo}+D${filaTotCapital}`),
-                    {
-                        t: 's',
-                        v: estadoCuadreTexto,
-                        f: `IF(ABS(D${filaTotActivo}-D${filaCierre})<0.01,"ECUACIÓN CUADRADA: ACTIVO = PASIVO + CAPITAL","DESCUADRE CONTABLE")`
-                    }
-                ]);
-
-                const wsBalance = XLSX.utils.aoa_to_sheet(aoaBalance);
-                wsBalance['!cols'] = [
-                    { wch: 15 },
-                    { wch: 45 },
-                    { wch: 22 },
-                    { wch: 24 },
-                    { wch: 48 }
-                ];
-
-                // Asegurar celdas de cierre y subtotales en wsBalance con propiedades exactas
-                wsBalance['D' + filaTotActivo] = crearCeldaNumero(totActivo, formulaTotActivo);
-                wsBalance['D' + filaTotPasivo] = crearCeldaNumero(totPasivo, formulaTotPasivo);
-                wsBalance['D' + filaTotCapital] = crearCeldaNumero(totCapital, `SUM(C${filaIniCap}:C${filaFinCap})`);
-                wsBalance['D' + filaCierre] = crearCeldaNumero(totPasivoCapital, `D${filaTotPasivo}+D${filaTotCapital}`);
-                wsBalance['E' + filaCierre] = {
-                    t: 's',
-                    v: estadoCuadreTexto,
-                    f: `IF(ABS(D${filaTotActivo}-D${filaCierre})<0.01,"ECUACIÓN CUADRADA: ACTIVO = PASIVO + CAPITAL","DESCUADRE CONTABLE")`
-                };
-
-                // Agregar Hojas 4 y 5 al libro
-                XLSX.utils.book_append_sheet(wb, wsBalance, 'Balance General');
-                XLSX.utils.book_append_sheet(wb, wsResultados, 'Estado de Resultados');
-
-                // ====================================================
-                // HOJA 6: "Flujo de Efectivo"
-                // ====================================================
-                const aoaFlujo = [
-                    ['SISTEMA CONTABLE WEB - EMPRESA COMERCIAL'],
-                    ['ESTADO DE FLUJO DE EFECTIVO'],
-                    [`Período: ${descPeriodo} | Fecha de Generación: ${new Date().toLocaleDateString('es-ES')}`],
-                    [],
-                    ['Asiento / Ref.', 'Fecha', 'Concepto de la Operación', 'Categoría', 'Entradas (C$)', 'Salidas (C$)']
-                ];
-
-                const entradas = (state.flujo?.entradas ?? state.flujo?.Entradas ?? []).filter(e => parseFloat(e.monto ?? e.Monto ?? 0) > 0);
-                const salidas = (state.flujo?.salidas ?? state.flujo?.Salidas ?? []).filter(s => parseFloat(s.monto ?? s.Monto ?? 0) > 0);
-                let rowFlujo = aoaFlujo.length; // Fila 5 es la cabecera (1-based en Excel)
-                let valTotalEntradas = 0;
-                let valTotalSalidas = 0;
-
-                // Bloque Entradas
-                rowFlujo++;
-                aoaFlujo.push(['', '', 'ACTIVIDADES DE OPERACIÓN Y FINANCIAMIENTO - ENTRADAS', '', '', '']);
-                const startEntradasRow = rowFlujo + 1;
-
-                if (entradas.length === 0) {
-                    rowFlujo++;
-                    aoaFlujo.push(['-', '-', 'Sin entradas registradas en el período', 'Operativo', crearCeldaNumero(0), '']);
-                } else {
-                    entradas.forEach(e => {
-                        rowFlujo++;
-                        const asId = e.asientoId ?? e.AsientoId;
-                        const fecha = e.fecha ? new Date(e.fecha).toLocaleDateString('es-ES') : '-';
-                        const concepto = e.concepto ?? e.Concepto ?? '';
-                        const cat = e.categoria ?? e.Categoria ?? 'Operativo';
-                        const monto = parseFloat(e.monto ?? e.Monto ?? 0);
-                        valTotalEntradas += monto;
-                        aoaFlujo.push([`As.#${asId}`, fecha, concepto, cat, crearCeldaNumero(monto), '']);
-                    });
-                }
-                const endEntradasRow = rowFlujo;
-
-                rowFlujo++;
-                const rowTotalEntradas = rowFlujo;
-                aoaFlujo.push([
-                    '',
-                    '',
-                    'TOTAL ENTRADAS DE EFECTIVO:',
-                    '',
-                    crearCeldaNumero(valTotalEntradas, `SUM(E${startEntradasRow}:E${endEntradasRow})`),
-                    ''
-                ]);
-
-                // Bloque Salidas
-                rowFlujo++;
-                aoaFlujo.push([]);
-                rowFlujo++;
-                aoaFlujo.push(['', '', 'ACTIVIDADES DE OPERACIÓN Y FINANCIAMIENTO - SALIDAS', '', '', '']);
-                const startSalidasRow = rowFlujo + 1;
-
-                if (salidas.length === 0) {
-                    rowFlujo++;
-                    aoaFlujo.push(['-', '-', 'Sin salidas registradas en el período', 'Operativo', '', crearCeldaNumero(0)]);
-                } else {
-                    salidas.forEach(s => {
-                        rowFlujo++;
-                        const asId = s.asientoId ?? s.AsientoId;
-                        const fecha = s.fecha ? new Date(s.fecha).toLocaleDateString('es-ES') : '-';
-                        const concepto = s.concepto ?? s.Concepto ?? '';
-                        const cat = s.categoria ?? s.Categoria ?? 'Operativo';
-                        const monto = parseFloat(s.monto ?? s.Monto ?? 0);
-                        valTotalSalidas += monto;
-                        aoaFlujo.push([`As.#${asId}`, fecha, concepto, cat, '', crearCeldaNumero(monto)]);
-                    });
-                }
-                const endSalidasRow = rowFlujo;
-
-                rowFlujo++;
-                const rowTotalSalidas = rowFlujo;
-                aoaFlujo.push([
-                    '',
-                    '',
-                    'TOTAL SALIDAS DE EFECTIVO:',
-                    '',
-                    '',
-                    crearCeldaNumero(valTotalSalidas, `SUM(F${startSalidasRow}:F${endSalidasRow})`)
-                ]);
-
-                // Variación Neta y Saldo Final
-                rowFlujo++;
-                aoaFlujo.push([]);
-                rowFlujo++;
-                const rowVarNeta = rowFlujo;
-                const valVarNeta = valTotalEntradas - valTotalSalidas;
-                aoaFlujo.push([
-                    '',
-                    '',
-                    'VARIACIÓN NETA DE EFECTIVO EN EL PERÍODO:',
-                    '',
-                    crearCeldaNumero(valVarNeta, `E${rowTotalEntradas}-F${rowTotalSalidas}`),
-                    ''
-                ]);
-
-                rowFlujo++;
-                const valSaldoFinal = Math.max(0, valVarNeta);
-                aoaFlujo.push([
-                    '',
-                    '',
-                    '(=) SALDO FINAL DISPONIBLE EN TESORERÍA (CAJA Y BANCOS):',
-                    '',
-                    crearCeldaNumero(valSaldoFinal, `MAX(0, E${rowVarNeta})`),
-                    ''
-                ]);
-
-                const wsFlujo = XLSX.utils.aoa_to_sheet(aoaFlujo);
-                wsFlujo['!cols'] = [
-                    { wch: 14 },
-                    { wch: 14 },
-                    { wch: 45 },
-                    { wch: 18 },
-                    { wch: 20 },
-                    { wch: 20 }
-                ];
-                XLSX.utils.book_append_sheet(wb, wsFlujo, 'Flujo de Efectivo');
-
-                // Descarga del libro de Excel generado
-                const fechaArchivo = new Date().toISOString().split('T')[0];
-                XLSX.writeFile(wb, `SistemaContable_Libros_y_Estados_${fechaArchivo}.xlsx`);
-                mostrarToast('¡Libro contable y estados financieros exportados con éxito a Excel!', 'success');
-            } catch (err) {
-                console.error('Error al exportar a Excel:', err);
-                mostrarAlertaGlobal('Error al Exportar Excel', err.message);
-                mostrarToast('Error al exportar Excel: ' + err.message, 'danger');
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = originalHtml;
-                }
-            }
-        }
     </script>
 </body>
 </html>

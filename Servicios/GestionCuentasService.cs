@@ -160,5 +160,43 @@ public class GestionCuentasService(IRepositorioContable repositorio, ReportesSer
 
         return false;
     }
+
+    /// <summary>
+    /// Elimina una cuenta contable validando integridad referencial (asientos y subcuentas).
+    /// </summary>
+    public void EliminarCuenta(string codigo)
+    {
+        if (string.IsNullOrWhiteSpace(codigo))
+            throw new DominioContableException("El código de la cuenta no puede estar vacío.");
+
+        var codigoLimpio = codigo.Trim();
+        var cuentas = repositorio.ObtenerCuentas().ToList();
+        var cuenta = cuentas.FirstOrDefault(c => c.Codigo.Equals(codigoLimpio, StringComparison.OrdinalIgnoreCase))
+            ?? throw new DominioContableException($"La cuenta '{codigoLimpio}' no existe en el catálogo contable.");
+
+        // 1. Verificar en asientos si la cuenta tiene al menos 1 movimiento registrado
+        var asientos = repositorio.ObtenerAsientos();
+        bool tieneMovimientos = asientos
+            .SelectMany(a => a.Lineas)
+            .Any(l => l.CodigoCuenta.Equals(codigoLimpio, StringComparison.OrdinalIgnoreCase));
+
+        if (tieneMovimientos)
+        {
+            throw new DominioContableException("No se puede eliminar la cuenta porque ya posee movimientos contables registrados.");
+        }
+
+        // 2. Verificar si existen subcuentas que dependan de esta cuenta como padre
+        var soloDigitosPadre = new string(codigoLimpio.Where(char.IsDigit).ToArray());
+        bool tieneHijas = cuentas.Any(c =>
+            !c.Codigo.Equals(codigoLimpio, StringComparison.OrdinalIgnoreCase) &&
+            EsSubcuenta(codigoLimpio, soloDigitosPadre, c.Codigo));
+
+        if (tieneHijas)
+        {
+            throw new DominioContableException("No se puede eliminar porque tiene subcuentas asociadas.");
+        }
+
+        repositorio.EliminarCuenta(codigoLimpio);
+    }
 }
 

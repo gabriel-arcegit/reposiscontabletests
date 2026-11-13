@@ -60,8 +60,8 @@ public class ReportesService(IRepositorioContable repositorio)
                                        g.Key.StartsWith("3") ? TipoCuenta.Capital :
                                        g.Key.StartsWith("4") ? TipoCuenta.Ingreso :
                                        g.Key.StartsWith("5") ? TipoCuenta.Costo : TipoCuenta.Gasto);
-                var naturaleza = c?.Naturaleza ?? (tipo is TipoCuenta.Activo or TipoCuenta.Costo or TipoCuenta.Gasto 
-                    ? NaturalezaSaldo.Deudora 
+                var naturaleza = c?.Naturaleza ?? (tipo is TipoCuenta.Activo or TipoCuenta.Costo or TipoCuenta.Gasto
+                    ? NaturalezaSaldo.Deudora
                     : NaturalezaSaldo.Acreedora);
                 var nombre = c?.Nombre ?? g.First().NombreCuenta;
 

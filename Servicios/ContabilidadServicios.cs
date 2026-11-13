@@ -48,16 +48,16 @@ public record VariacionCapitalReporte(
 
 public class ContabilidadServicios(IRepositorioContable repositorio, ReportesService reportesService)
 {
-    public List<FilaLibroMayor> CalcularLibroMayor(string? tipoPeriodo = null, DateTime? fechaReferencia = null)
+    public List<FilaLibroMayor> CalcularLibroMayor(string? tipoPeriodo = null, DateTime? fechaReferencia = null, DateTime? fechaInicio = null, DateTime? fechaFin = null)
     {
-        var (desde, hasta, _) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia);
+        var (desde, hasta, _) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia, fechaInicio, fechaFin);
         // Para el Mayor acumulativo a la fecha de corte
         return reportesService.ObtenerLibroMayor(hasta);
     }
 
-    public BalanzaComprobacionReporte CalcularBalanzaComprobacion(string? tipoPeriodo = null, DateTime? fechaReferencia = null)
+    public BalanzaComprobacionReporte CalcularBalanzaComprobacion(string? tipoPeriodo = null, DateTime? fechaReferencia = null, DateTime? fechaInicio = null, DateTime? fechaFin = null)
     {
-        var (desde, hasta, desc) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia);
+        var (desde, hasta, desc) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia, fechaInicio, fechaFin);
         var mayor = reportesService.ObtenerLibroMayor(hasta);
 
         var filas = mayor
@@ -104,15 +104,15 @@ public class ContabilidadServicios(IRepositorioContable repositorio, ReportesSer
         );
     }
 
-    public BalanceGeneralReporte CalcularBalanceGeneral(string? tipoPeriodo = null, DateTime? fechaReferencia = null)
+    public BalanceGeneralReporte CalcularBalanceGeneral(string? tipoPeriodo = null, DateTime? fechaReferencia = null, DateTime? fechaInicio = null, DateTime? fechaFin = null)
     {
-        var (desde, hasta, desc) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia);
+        var (desde, hasta, desc) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia, fechaInicio, fechaFin);
         return reportesService.ObtenerBalanceGeneral(hasta, desc);
     }
 
-    public EstadoResultadosReporte CalcularEstadoResultados(string? tipoPeriodo = null, DateTime? fechaReferencia = null)
+    public EstadoResultadosReporte CalcularEstadoResultados(string? tipoPeriodo = null, DateTime? fechaReferencia = null, DateTime? fechaInicio = null, DateTime? fechaFin = null)
     {
-        var (desde, hasta, _) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia);
+        var (desde, hasta, _) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia, fechaInicio, fechaFin);
 
         var cuentas = repositorio.ObtenerCuentas().ToDictionary(c => c.Codigo);
         var asientos = repositorio.ObtenerAsientos();
@@ -171,9 +171,9 @@ public class ContabilidadServicios(IRepositorioContable repositorio, ReportesSer
         );
     }
 
-    public List<AsientoDiario> ObtenerAsientosFiltrados(string? tipoPeriodo = null, DateTime? fechaReferencia = null)
+    public List<AsientoDiario> ObtenerAsientosFiltrados(string? tipoPeriodo = null, DateTime? fechaReferencia = null, DateTime? fechaInicio = null, DateTime? fechaFin = null)
     {
-        var (desde, hasta, _) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia);
+        var (desde, hasta, _) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia, fechaInicio, fechaFin);
         var asientos = repositorio.ObtenerAsientos();
         if (desde.HasValue)
             asientos = asientos.Where(a => a.Fecha >= desde.Value);
@@ -273,9 +273,9 @@ public class ContabilidadServicios(IRepositorioContable repositorio, ReportesSer
         repositorio.GuardarAsiento(asiento);
     }
 
-    public FlujoEfectivoReporte CalcularFlujoEfectivo(string? tipoPeriodo = null, DateTime? fechaReferencia = null)
+    public FlujoEfectivoReporte CalcularFlujoEfectivo(string? tipoPeriodo = null, DateTime? fechaReferencia = null, DateTime? fechaInicio = null, DateTime? fechaFin = null)
     {
-        var (desde, hasta, desc) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia);
+        var (desde, hasta, desc) = PeriodoHelper.ResolverRango(tipoPeriodo, fechaReferencia, fechaInicio, fechaFin);
         var todosAsientos = repositorio.ObtenerAsientos().OrderBy(a => a.Fecha).ThenBy(a => a.Id).ToList();
         var cuentas = repositorio.ObtenerCuentas().ToDictionary(c => c.Codigo);
 
@@ -377,9 +377,9 @@ public class ContabilidadServicios(IRepositorioContable repositorio, ReportesSer
         return "Otras Salidas";
     }
 
-    public VariacionCapitalReporte CalcularVariacionCapital(string? tipoPeriodo = null, DateTime? fechaReferencia = null)
+    public VariacionCapitalReporte CalcularVariacionCapital(string? tipoPeriodo = null, DateTime? fechaReferencia = null, DateTime? fechaInicio = null, DateTime? fechaFin = null)
     {
-        var mayor = CalcularLibroMayor(tipoPeriodo, fechaReferencia);
+        var mayor = CalcularLibroMayor(tipoPeriodo, fechaReferencia, fechaInicio, fechaFin);
         var asientos = repositorio.ObtenerAsientos().ToList();
         var cuentas = repositorio.ObtenerCuentas().ToDictionary(c => c.Codigo);
 

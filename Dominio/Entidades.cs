@@ -117,6 +117,24 @@ public class AsientoDiario
 }
 
 /// <summary>
+/// Representa a un usuario del sistema para autenticación y seguridad.
+/// </summary>
+public class UsuarioSistema
+{
+    public int Id { get; set; }
+    public string NombreCompleto { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty;
+    public string Salt { get; set; } = string.Empty;
+    public string Rol { get; set; } = "Admin";
+    public string PreguntaSeguridad { get; set; } = string.Empty;
+    public string RespuestaHash { get; set; } = string.Empty;
+    public string RespuestaSalt { get; set; } = string.Empty;
+    public string? TokenSesion { get; set; }
+    public DateTime? ExpiracionSesion { get; set; }
+}
+
+/// <summary>
 /// Contrato para el repositorio de persistencia contable.
 /// </summary>
 public interface IRepositorioContable
@@ -127,4 +145,11 @@ public interface IRepositorioContable
     IEnumerable<AsientoDiario> ObtenerAsientos();
     void ActualizarEstadoCuenta(string codigo, bool estaActiva);
     void AgregarCuenta(CuentaContable cuenta);
+    void EliminarCuenta(string codigo);
+
+    // Usuarios y Autenticación
+    UsuarioSistema? ObtenerUsuarioPorUsername(string username);
+    UsuarioSistema? ObtenerUsuarioPorToken(string token);
+    void ActualizarTokenSesion(int usuarioId, string? token, DateTime? expiracion);
+    void ActualizarPassword(int usuarioId, string passwordHash, string salt, string? pregunta = null, string? respuestaHash = null, string? respuestaSalt = null);
 }
